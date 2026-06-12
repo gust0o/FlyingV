@@ -47,7 +47,8 @@ body {
 
 .name {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .number {
@@ -87,7 +88,7 @@ body {
 
   .name,
   .number {
-    font-size: clamp(3.4rem, 19vw, 6rem);
+    font-size: clamp(3rem, 16vw, 5.3rem);
     line-height: 0.84;
   }
 
