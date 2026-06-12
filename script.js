@@ -6,6 +6,7 @@ const people = [
   { name: "Nardo", arrivalDate: "2026-06-18" },
   { name: "Rocco", randomRange: [-1, 365], intervalMs: 500 },
   { name: "Jarbo", randomSymbol: true },
+  { name: "Rattolino", hauntedRange: [0, 999], intervalMs: 85 },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
 ];
@@ -62,6 +63,10 @@ function getNumber(person) {
     return STRANGE_SYMBOLS[getRandomInt(0, STRANGE_SYMBOLS.length - 1)];
   }
 
+  if (person.hauntedRange) {
+    return formatMissingDays(getRandomInt(person.hauntedRange[0], person.hauntedRange[1]));
+  }
+
   return formatMissingDays(getDaysUntil(person.arrivalDate));
 }
 
@@ -70,6 +75,9 @@ function render() {
     ...people.map((person) => {
       const row = document.createElement("article");
       row.className = "countdown-row";
+      if (person.hauntedRange) {
+        row.classList.add("countdown-row--haunted");
+      }
 
       const name = document.createElement("h1");
       name.className = "name";
@@ -77,10 +85,13 @@ function render() {
 
       const number = document.createElement("p");
       number.className = "number";
+      if (person.hauntedRange) {
+        number.classList.add("number--haunted");
+      }
       number.dataset.name = person.name;
       number.textContent = getNumber(person);
 
-      if (person.randomRange && person.intervalMs) {
+      if ((person.randomRange || person.hauntedRange) && person.intervalMs) {
         window.setInterval(() => {
           number.textContent = getNumber(person);
         }, person.intervalMs);

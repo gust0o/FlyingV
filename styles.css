@@ -72,6 +72,39 @@ body {
   transform-origin: center;
 }
 
+.number--haunted {
+  color: #111111;
+  filter: blur(0.06em);
+  opacity: 0.86;
+  text-shadow:
+    -0.05em 0.02em 0 rgba(0, 0, 0, 0.34),
+    0.06em -0.03em 0 rgba(0, 0, 0, 0.22);
+  animation: haunted-number 0.46s steps(2, end) infinite;
+}
+
+.number--haunted::before {
+  background: #d7d7d7;
+  opacity: 0.72;
+}
+
+@keyframes haunted-number {
+  0% {
+    transform: translate(-0.04em, 0.01em) skewX(-3deg);
+  }
+
+  33% {
+    transform: translate(0.05em, -0.03em) skewX(2deg);
+  }
+
+  66% {
+    transform: translate(-0.02em, 0.04em) skewX(-1deg);
+  }
+
+  100% {
+    transform: translate(0.03em, -0.01em) skewX(3deg);
+  }
+}
+
 @media (max-width: 760px) {
   .page {
     padding: 18px 12px 24px;
@@ -94,5 +127,10 @@ body {
 
   .number {
     text-align: right;
+  }
+
+  .countdown-row--haunted .name,
+  .countdown-row--haunted .number {
+    font-size: clamp(2.55rem, 12.5vw, 5.3rem);
   }
 }
