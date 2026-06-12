@@ -77,24 +77,6 @@ function getDisplayName(person) {
   return person.aliases[getRandomInt(0, person.aliases.length - 1)];
 }
 
-function getRowScale(displayName) {
-  const length = displayName.replace(/\s/g, "").length + (displayName.includes(" ") ? 1.5 : 0);
-
-  if (length >= 13) {
-    return "62";
-  }
-
-  if (length >= 11) {
-    return "70";
-  }
-
-  if (length >= 9) {
-    return "80";
-  }
-
-  return "100";
-}
-
 function formatMissingDays(days) {
   return `-${Math.abs(days)}`;
 }
@@ -158,7 +140,6 @@ function render() {
       const displayName = getDisplayName(person);
       const row = document.createElement("article");
       row.className = "countdown-row";
-      row.classList.add(`countdown-row--scale-${getRowScale(displayName)}`);
       if (person.hauntedDate) {
         row.classList.add("countdown-row--haunted");
       }

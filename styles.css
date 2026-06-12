@@ -41,7 +41,7 @@ body {
 .name,
 .number {
   margin: 0;
-  font-size: clamp(4.5rem, 15vw, 17rem);
+  font-size: clamp(2.1rem, 8.8vw, 10rem);
   font-weight: 700;
   line-height: 0.82;
   letter-spacing: 0;
@@ -51,21 +51,6 @@ body {
   min-width: 0;
   overflow-wrap: normal;
   white-space: nowrap;
-}
-
-.countdown-row--scale-80 .name,
-.countdown-row--scale-80 .number {
-  font-size: clamp(3.6rem, 12vw, 13.6rem);
-}
-
-.countdown-row--scale-70 .name,
-.countdown-row--scale-70 .number {
-  font-size: clamp(3.15rem, 10.5vw, 11.9rem);
-}
-
-.countdown-row--scale-62 .name,
-.countdown-row--scale-62 .number {
-  font-size: clamp(2.8rem, 9.3vw, 10.5rem);
 }
 
 .number {
@@ -192,40 +177,11 @@ body {
 
   .name,
   .number {
-    font-size: clamp(3rem, 16vw, 5.3rem);
+    font-size: clamp(1.75rem, 8.8vw, 4rem);
     line-height: 0.84;
-  }
-
-  .countdown-row--scale-80 .name,
-  .countdown-row--scale-80 .number {
-    font-size: clamp(2.4rem, 12.8vw, 4.24rem);
-  }
-
-  .countdown-row--scale-70 .name,
-  .countdown-row--scale-70 .number {
-    font-size: clamp(2.1rem, 11.2vw, 3.71rem);
-  }
-
-  .countdown-row--scale-62 .name,
-  .countdown-row--scale-62 .number {
-    font-size: clamp(1.86rem, 9.92vw, 3.29rem);
   }
 
   .number {
     text-align: right;
-  }
-
-  .countdown-row--haunted .name,
-  .countdown-row--haunted .number {
-    font-size: clamp(2.55rem, 12.5vw, 5.3rem);
-  }
-
-  .countdown-row--haunted.countdown-row--scale-80 .name,
-  .countdown-row--haunted.countdown-row--scale-80 .number,
-  .countdown-row--haunted.countdown-row--scale-70 .name,
-  .countdown-row--haunted.countdown-row--scale-70 .number,
-  .countdown-row--haunted.countdown-row--scale-62 .name,
-  .countdown-row--haunted.countdown-row--scale-62 .number {
-    font-size: clamp(2.15rem, 10.2vw, 4.3rem);
   }
 }
