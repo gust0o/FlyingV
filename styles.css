@@ -1,0 +1,81 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: #ffffff;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: #000000;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  background: #ffffff;
+}
+
+.page {
+  width: min(100%, 1800px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 56px);
+}
+
+.countdown-list {
+  display: grid;
+  gap: clamp(18px, 2.6vw, 46px);
+}
+
+.countdown-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(18px, 4vw, 80px);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.name,
+.number {
+  margin: 0;
+  font-size: clamp(4.5rem, 15vw, 17rem);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: 0;
+}
+
+.name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 18px 12px 24px;
+  }
+
+  .countdown-list {
+    gap: 30px;
+  }
+
+  .countdown-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .name,
+  .number {
+    font-size: clamp(4.2rem, 24vw, 8rem);
+    line-height: 0.84;
+  }
+
+  .number {
+    text-align: left;
+  }
+}
