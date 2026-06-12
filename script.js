@@ -1,12 +1,43 @@
 const people = [
-  { name: "Giulius", infinite: true },
-  { name: "Gusto", infinite: true },
-  { name: "Esse", infinite: true },
-  { name: "Ciccio", arrivalDate: "2026-08-08" },
-  { name: "Nardo", arrivalDate: "2026-06-18" },
-  { name: "Rocco", randomRange: [-1, 365], intervalMs: 500 },
-  { name: "Jarbo", randomSymbol: true },
-  { name: "Rattolino", hauntedDate: "2026-08-15", hauntedVarianceDays: 6 },
+  { name: "Giulius", aliases: ["Giulius", "Bibubibi", "Andrea"], infinite: true },
+  { name: "Gusto", aliases: ["Gusto", "Gustavo", "Gepo", "Glep", "El Pequeno"], infinite: true },
+  {
+    name: "Esse",
+    aliases: [
+      "Esse",
+      "Cyphercode",
+      "C1pherc0de",
+      "Cyph3rc0de",
+      "C1pherCode",
+      "CypherC0d3",
+      "C\u00a5phercode",
+      "Giacoooooo",
+      "Il Messia",
+    ],
+    infinite: true,
+  },
+  { name: "Ciccio", aliases: ["Ciccio", "Alcuni Gufi", "De Rose", "Millepose"], arrivalDate: "2026-08-08" },
+  { name: "Nardo", aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko"], arrivalDate: "2026-06-18" },
+  {
+    name: "Rocco",
+    aliases: [
+      "Rocco",
+      "Rocco Maria",
+      "Stefano Nazzi",
+      "Enrica Riera",
+      "Pellicano",
+      "Pelllimagico",
+    ],
+    randomRange: [-1, 365],
+    intervalMs: 500,
+  },
+  { name: "Jarbo", aliases: ["Jarbo", "Jarbolone", "Gobu", "Giambadabro"], randomSymbol: true },
+  {
+    name: "Rattolino",
+    aliases: ["Federico", "Piaz", "Topo", "Topastro", "Muride", "Rattolino"],
+    hauntedDate: "2026-08-15",
+    hauntedVarianceDays: 6,
+  },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
 ];
@@ -40,6 +71,28 @@ function shuffle(items) {
   }
 
   return shuffled;
+}
+
+function getDisplayName(person) {
+  return person.aliases[getRandomInt(0, person.aliases.length - 1)];
+}
+
+function getRowScale(displayName) {
+  const length = displayName.replace(/\s/g, "").length + (displayName.includes(" ") ? 1.5 : 0);
+
+  if (length >= 13) {
+    return "62";
+  }
+
+  if (length >= 11) {
+    return "70";
+  }
+
+  if (length >= 9) {
+    return "80";
+  }
+
+  return "100";
 }
 
 function formatMissingDays(days) {
@@ -102,15 +155,17 @@ function getNumber(person) {
 function render() {
   list.replaceChildren(
     ...shuffle(people).map((person) => {
+      const displayName = getDisplayName(person);
       const row = document.createElement("article");
       row.className = "countdown-row";
+      row.classList.add(`countdown-row--scale-${getRowScale(displayName)}`);
       if (person.hauntedDate) {
         row.classList.add("countdown-row--haunted");
       }
 
       const name = document.createElement("h1");
       name.className = "name";
-      name.textContent = person.name;
+      name.textContent = displayName;
 
       const number = document.createElement("p");
       number.className = "number";
