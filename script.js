@@ -26,7 +26,7 @@ const people = [
       "Stefano Nazzi",
       "Enrica Riera",
       "Pellicano",
-      "Pelllimagico",
+      "Pellimagico",
     ],
     randomRange: [-1, 365],
     intervalMs: 500,
