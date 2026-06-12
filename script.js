@@ -57,6 +57,8 @@ const STRANGE_SYMBOLS = [
 ];
 
 const list = document.querySelector("#countdown-list");
+const root = document.documentElement;
+let resizeFrame = 0;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -134,6 +136,81 @@ function getNumber(person) {
   return formatMissingDays(getDaysUntil(person.arrivalDate));
 }
 
+function getFitNumber(person, visibleNumber) {
+  if (person.randomRange) {
+    const maxMagnitude = Math.max(Math.abs(person.randomRange[0]), Math.abs(person.randomRange[1]));
+    return formatMissingDays(maxMagnitude);
+  }
+
+  if (person.hauntedDate) {
+    return "-70";
+  }
+
+  return visibleNumber;
+}
+
+function measureText(text, includeNumberPadding = false) {
+  const measure = document.createElement("span");
+  measure.textContent = text;
+  measure.style.position = "fixed";
+  measure.style.left = "-9999px";
+  measure.style.top = "0";
+  measure.style.visibility = "hidden";
+  measure.style.pointerEvents = "none";
+  measure.style.whiteSpace = "nowrap";
+  measure.style.fontFamily = "Helvetica, Arial, sans-serif";
+  measure.style.fontSize = getComputedStyle(root).getPropertyValue("--type-size");
+  measure.style.fontWeight = "700";
+  measure.style.letterSpacing = "0";
+  document.body.appendChild(measure);
+  const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
+  const padding = includeNumberPadding ? typeSize * 0.06 : 0;
+  const width = measure.getBoundingClientRect().width + padding;
+  measure.remove();
+  return width;
+}
+
+function rowsFit() {
+  return Array.from(list.querySelectorAll(".countdown-row")).every((row) => {
+    const name = row.querySelector(".name");
+    const number = row.querySelector(".number");
+    const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+    const width = measureText(name.textContent)
+      + measureText(number.dataset.fitValue, true)
+      + gap;
+
+    return width <= row.getBoundingClientRect().width;
+  });
+}
+
+function fitTypeSize() {
+  if (!list.children.length) {
+    return;
+  }
+
+  const maxSize = Math.min(window.innerWidth * 0.16, 180);
+  let low = 14;
+  let high = maxSize;
+
+  for (let step = 0; step < 12; step += 1) {
+    const middle = (low + high) / 2;
+    root.style.setProperty("--type-size", `${middle}px`);
+
+    if (rowsFit()) {
+      low = middle;
+    } else {
+      high = middle;
+    }
+  }
+
+  root.style.setProperty("--type-size", `${Math.floor(low)}px`);
+}
+
+function scheduleFitTypeSize() {
+  window.cancelAnimationFrame(resizeFrame);
+  resizeFrame = window.requestAnimationFrame(fitTypeSize);
+}
+
 function render() {
   list.replaceChildren(
     ...shuffle(people).map((person) => {
@@ -156,6 +233,7 @@ function render() {
       number.dataset.name = person.name;
       number.textContent = getNumber(person);
       number.dataset.value = number.textContent;
+      number.dataset.fitValue = getFitNumber(person, number.textContent);
 
       if (person.randomRange && person.intervalMs) {
         window.setInterval(() => {
@@ -168,6 +246,9 @@ function render() {
       return row;
     }),
   );
+
+  scheduleFitTypeSize();
 }
 
 render();
+window.addEventListener("resize", scheduleFitTypeSize);

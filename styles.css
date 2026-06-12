@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+:root {
+  --type-size: 72px;
+}
+
 html {
   min-height: 100%;
   overflow-x: hidden;
@@ -41,7 +45,7 @@ body {
 .name,
 .number {
   margin: 0;
-  font-size: clamp(2.1rem, 8.8vw, 10rem);
+  font-size: var(--type-size);
   font-weight: 700;
   line-height: 0.82;
   letter-spacing: 0;
@@ -177,7 +181,6 @@ body {
 
   .name,
   .number {
-    font-size: clamp(1.75rem, 8.8vw, 4rem);
     line-height: 0.84;
   }
 
