@@ -51,8 +51,24 @@ body {
 }
 
 .number {
+  position: relative;
+  z-index: 0;
+  padding: 0 0.03em;
   text-align: right;
   white-space: nowrap;
+}
+
+.number::before {
+  position: absolute;
+  right: -0.08em;
+  bottom: 0.02em;
+  left: -0.08em;
+  z-index: -1;
+  height: 0.36em;
+  content: "";
+  background: #b7ff35;
+  transform: rotate(-1.5deg);
+  transform-origin: center;
 }
 
 @media (max-width: 760px) {
