@@ -1,11 +1,11 @@
 const people = [
   { name: "Giulius", infinite: true },
-  { name: "gusto", infinite: true },
-  { name: "esse", infinite: true },
+  { name: "Gusto", infinite: true },
+  { name: "Esse", infinite: true },
   { name: "Ciccio", arrivalDate: "2026-08-08" },
   { name: "Nardo", arrivalDate: "2026-06-18" },
   { name: "Rocco", randomRange: [-1, 365], intervalMs: 500 },
-  { name: "jarbo", randomSymbol: true },
+  { name: "Jarbo", randomSymbol: true },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
 ];
@@ -30,6 +30,10 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function formatMissingDays(days) {
+  return `-${Math.abs(days)}`;
+}
+
 function startOfLocalDay(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
@@ -51,14 +55,14 @@ function getNumber(person) {
   }
 
   if (person.randomRange) {
-    return String(getRandomInt(person.randomRange[0], person.randomRange[1]));
+    return formatMissingDays(getRandomInt(person.randomRange[0], person.randomRange[1]));
   }
 
   if (person.randomSymbol) {
     return STRANGE_SYMBOLS[getRandomInt(0, STRANGE_SYMBOLS.length - 1)];
   }
 
-  return String(getDaysUntil(person.arrivalDate));
+  return formatMissingDays(getDaysUntil(person.arrivalDate));
 }
 
 function render() {
