@@ -31,6 +31,17 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function shuffle(items) {
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = getRandomInt(0, index);
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+
+  return shuffled;
+}
+
 function formatMissingDays(days) {
   return `-${Math.abs(days)}`;
 }
@@ -90,7 +101,7 @@ function getNumber(person) {
 
 function render() {
   list.replaceChildren(
-    ...people.map((person) => {
+    ...shuffle(people).map((person) => {
       const row = document.createElement("article");
       row.className = "countdown-row";
       if (person.hauntedDate) {
