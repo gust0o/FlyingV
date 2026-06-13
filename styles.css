@@ -23,14 +23,19 @@ body {
 }
 
 .page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
   width: min(100%, 1800px);
-  min-height: 100vh;
+  min-height: 100svh;
   margin: 0 auto;
   padding: clamp(18px, 3vw, 56px);
 }
 
 .countdown-list {
   display: grid;
+  width: 100%;
   gap: clamp(18px, 2.6vw, 46px);
 }
 
@@ -150,8 +155,6 @@ body {
   color: #000000;
   gap: 0;
   filter: none;
-  animation: haunted-number 5.6s ease-in-out infinite;
-  will-change: opacity, transform;
 }
 
 .number--haunted::before {
@@ -173,33 +176,19 @@ body {
 
 .haunted-sign {
   display: inline-block;
-  color: rgba(0, 0, 0, 0.58);
-  filter: blur(0.006em);
+  color: #000000;
+  filter: none;
   line-height: 0.82;
-  text-shadow: 0.02em 0.02em 0.02em rgba(0, 0, 0, 0.12);
+  text-shadow: none;
 }
 
 .haunted-canvas {
   display: block;
-  width: 1.68em;
-  height: 0.9em;
-  margin: -0.18em -0.06em -0.13em -0.08em;
-  opacity: 0.96;
-  filter: blur(0.01em) contrast(1.08);
-}
-
-@keyframes haunted-number {
-  0% {
-    transform: translate(-0.04em, 0.02em) skewX(-2deg) scaleX(0.98);
-  }
-
-  50% {
-    transform: translate(0.05em, -0.035em) skewX(2deg) scaleX(1.04);
-  }
-
-  100% {
-    transform: translate(-0.03em, 0.04em) skewX(-3deg) scaleX(1);
-  }
+  width: 2.65em;
+  height: 1.2em;
+  margin: -0.42em -0.2em -0.2em -0.16em;
+  opacity: 0.98;
+  filter: blur(0.018em) contrast(1.06);
 }
 
 @keyframes electric-shock {
@@ -275,6 +264,7 @@ body {
 
 @media (max-width: 760px) {
   .page {
+    justify-content: center;
     padding: 18px 12px 24px;
   }
 
