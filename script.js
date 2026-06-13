@@ -37,6 +37,7 @@ const people = [
     aliases: ["Federico", "Piaz", "Topo", "Topastro", "Muride", "Rattolino"],
     hauntedDate: "2026-08-15",
     hauntedVarianceDays: 6,
+    hauntedIntervalMs: 5200,
   },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
@@ -120,6 +121,11 @@ function getHauntedArrivalDate(person) {
   return person.runtimeArrivalDate;
 }
 
+function resetHauntedArrivalDate(person) {
+  person.runtimeArrivalDate = "";
+  return getHauntedArrivalDate(person);
+}
+
 function getNumber(person) {
   if (person.infinite) {
     return "\u221e";
@@ -153,6 +159,31 @@ function createCheckMark() {
   svg.append(path);
 
   return svg;
+}
+
+function createHauntedParticles() {
+  const fragment = document.createDocumentFragment();
+
+  for (let index = 0; index < 72; index += 1) {
+    const particle = document.createElement("i");
+    particle.className = "number-particle";
+    particle.style.setProperty("--x", `${getRandomInt(-52, 116)}%`);
+    particle.style.setProperty("--y", `${getRandomInt(-36, 132)}%`);
+    particle.style.setProperty("--size", `${getRandomInt(3, 12) / 100}em`);
+    const alpha = getRandomInt(10, 48) / 100;
+    particle.style.setProperty("--alpha", `${alpha}`);
+    particle.style.setProperty("--alpha-start", `${alpha * 0.7}`);
+    particle.style.setProperty("--alpha-end", `${alpha * 0.25}`);
+    particle.style.setProperty("--drift-x", `${getRandomInt(-34, 24) / 100}em`);
+    particle.style.setProperty("--drift-y", `${getRandomInt(-30, 18) / 100}em`);
+    particle.style.setProperty("--drift-x-end", `${getRandomInt(-64, 44) / 100}em`);
+    particle.style.setProperty("--drift-y-end", `${getRandomInt(-52, 32) / 100}em`);
+    particle.style.setProperty("--duration", `${getRandomInt(34, 72) / 10}s`);
+    particle.style.setProperty("--delay", `${getRandomInt(-70, 0) / 10}s`);
+    fragment.append(particle);
+  }
+
+  return fragment;
 }
 
 function getFitNumber(person, visibleNumber) {
@@ -277,6 +308,19 @@ function render() {
           number.textContent = getNumber(person);
           number.dataset.value = number.textContent;
         }, person.intervalMs);
+      }
+
+      if (person.hauntedDate) {
+        number.append(createHauntedParticles());
+
+        if (person.hauntedIntervalMs) {
+          window.setInterval(() => {
+            resetHauntedArrivalDate(person);
+            number.textContent = getNumber(person);
+            number.dataset.value = number.textContent;
+            number.append(createHauntedParticles());
+          }, person.hauntedIntervalMs);
+        }
       }
 
       row.append(name, number);
