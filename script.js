@@ -167,8 +167,8 @@ function createHauntedParticles() {
   for (let index = 0; index < 72; index += 1) {
     const particle = document.createElement("i");
     particle.className = "number-particle";
-    particle.style.setProperty("--x", `${getRandomInt(-52, 116)}%`);
-    particle.style.setProperty("--y", `${getRandomInt(-36, 132)}%`);
+    particle.style.setProperty("--x", `${getRandomInt(-8, 112)}%`);
+    particle.style.setProperty("--y", `${getRandomInt(-28, 124)}%`);
     particle.style.setProperty("--size", `${getRandomInt(3, 12) / 100}em`);
     const alpha = getRandomInt(10, 48) / 100;
     particle.style.setProperty("--alpha", `${alpha}`);
@@ -184,6 +184,24 @@ function createHauntedParticles() {
   }
 
   return fragment;
+}
+
+function setHauntedNumber(number, value) {
+  const sign = value.startsWith("-") ? "-" : "";
+  const digits = sign ? value.slice(1) : value;
+  const signElement = document.createElement("span");
+  const digitsElement = document.createElement("span");
+
+  signElement.className = "haunted-sign";
+  signElement.textContent = sign;
+  digitsElement.className = "haunted-digits";
+  digitsElement.textContent = digits;
+  digitsElement.dataset.digits = digits;
+  digitsElement.append(createHauntedParticles());
+
+  number.replaceChildren(signElement, digitsElement);
+  number.dataset.value = value;
+  number.dataset.digits = digits;
 }
 
 function getFitNumber(person, visibleNumber) {
@@ -311,14 +329,12 @@ function render() {
       }
 
       if (person.hauntedDate) {
-        number.append(createHauntedParticles());
+        setHauntedNumber(number, number.dataset.value);
 
         if (person.hauntedIntervalMs) {
           window.setInterval(() => {
             resetHauntedArrivalDate(person);
-            number.textContent = getNumber(person);
-            number.dataset.value = number.textContent;
-            number.append(createHauntedParticles());
+            setHauntedNumber(number, getNumber(person));
           }, person.hauntedIntervalMs);
         }
       }
