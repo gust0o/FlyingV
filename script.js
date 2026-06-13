@@ -45,21 +45,35 @@ const people = [
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const STRANGE_SYMBOLS = [
-  "\u{13000}",
-  "\u0416",
-  "\uA9A7",
-  "\u1B13",
-  "\u0F12",
-  "\u16A0",
-  "\uA66E",
-  "\u1703",
-  "\u03DE",
-  "\u{102A0}",
+  "𐦝",
+  "𐃡",
+  "𐎧",
+  "𐐝",
+  "𐑀𐒻",
+  "𐒾𐒿",
+  "𐙼",
+  "𐙅",
+  "𐡌",
+  "𐡊",
+  "𐤊",
+  "𐦂",
+  "𐦉𐧵",
+  "𐮉",
+  "𐲖",
+  "𐴍𑅄",
+  "ਔ",
+  "Ꮘ",
+  "Ꮔ",
+  "𐊃",
+  "𐊄𐦞𐦆",
 ];
 
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
 let resizeFrame = 0;
+const HAUNTED_CANVAS_WIDTH = 320;
+const HAUNTED_CANVAS_HEIGHT = 170;
+const HAUNTED_PARTICLE_COUNT = 420;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -161,47 +175,163 @@ function createCheckMark() {
   return svg;
 }
 
-function createHauntedParticles() {
-  const fragment = document.createDocumentFragment();
+function getDigitTargets(digits) {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  canvas.width = HAUNTED_CANVAS_WIDTH;
+  canvas.height = HAUNTED_CANVAS_HEIGHT;
 
-  for (let index = 0; index < 72; index += 1) {
-    const particle = document.createElement("i");
-    particle.className = "number-particle";
-    particle.style.setProperty("--x", `${getRandomInt(-8, 112)}%`);
-    particle.style.setProperty("--y", `${getRandomInt(-28, 124)}%`);
-    particle.style.setProperty("--size", `${getRandomInt(3, 12) / 100}em`);
-    const alpha = getRandomInt(10, 48) / 100;
-    particle.style.setProperty("--alpha", `${alpha}`);
-    particle.style.setProperty("--alpha-start", `${alpha * 0.7}`);
-    particle.style.setProperty("--alpha-end", `${alpha * 0.25}`);
-    particle.style.setProperty("--drift-x", `${getRandomInt(-34, 24) / 100}em`);
-    particle.style.setProperty("--drift-y", `${getRandomInt(-30, 18) / 100}em`);
-    particle.style.setProperty("--drift-x-end", `${getRandomInt(-64, 44) / 100}em`);
-    particle.style.setProperty("--drift-y-end", `${getRandomInt(-52, 32) / 100}em`);
-    particle.style.setProperty("--duration", `${getRandomInt(34, 72) / 10}s`);
-    particle.style.setProperty("--delay", `${getRandomInt(-70, 0) / 10}s`);
-    fragment.append(particle);
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#000000";
+  context.font = "700 132px Helvetica, Arial, sans-serif";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(digits, canvas.width / 2, canvas.height * 0.55);
+
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  const targets = [];
+
+  for (let y = 4; y < canvas.height; y += 4) {
+    for (let x = 4; x < canvas.width; x += 4) {
+      const alpha = pixels[((y * canvas.width + x) * 4) + 3];
+      if (alpha > 80 && Math.random() > 0.34) {
+        targets.push({ x, y, alpha: alpha / 255 });
+      }
+    }
   }
 
-  return fragment;
+  return shuffle(targets).slice(0, HAUNTED_PARTICLE_COUNT);
+}
+
+function createHauntedParticle(target) {
+  return {
+    x: target.x + getRandomInt(-46, 46),
+    y: target.y + getRandomInt(-34, 34),
+    targetX: target.x,
+    targetY: target.y,
+    size: getRandomInt(28, 72) / 10,
+    alpha: 0.09 + target.alpha * 0.43,
+    light: Math.random() > 0.78,
+    pull: 0.014 + Math.random() * 0.028,
+    wander: 0.42 + Math.random() * 0.82,
+    phase: Math.random() * Math.PI * 2,
+  };
+}
+
+function retargetHauntedParticles(state, digits) {
+  const targets = getDigitTargets(digits);
+  state.digits = digits;
+
+  while (state.particles.length < targets.length) {
+    state.particles.push(createHauntedParticle(targets[state.particles.length]));
+  }
+
+  state.particles = state.particles.slice(0, targets.length);
+  shuffle(targets).forEach((target, index) => {
+    const particle = state.particles[index];
+    particle.targetX = target.x + getRandomInt(-4, 4);
+    particle.targetY = target.y + getRandomInt(-4, 4);
+    particle.alpha = 0.09 + target.alpha * 0.43;
+    particle.light = Math.random() > 0.78;
+  });
+}
+
+function drawHauntedParticles(state) {
+  const { canvas, context, particles } = state;
+  const now = Date.now() / 1000;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.filter((particle) => !particle.light).forEach((particle) => {
+    const wobbleX = Math.sin(now * 0.9 + particle.phase) * particle.wander;
+    const wobbleY = Math.cos(now * 0.7 + particle.phase) * particle.wander;
+    particle.x += (particle.targetX + wobbleX - particle.x) * particle.pull;
+    particle.y += (particle.targetY + wobbleY - particle.y) * particle.pull;
+
+    const radius = particle.size * 3;
+    const gradient = context.createRadialGradient(
+      particle.x,
+      particle.y,
+      0,
+      particle.x,
+      particle.y,
+      radius,
+    );
+
+    gradient.addColorStop(0, `rgba(0, 0, 0, ${particle.alpha})`);
+    gradient.addColorStop(0.46, `rgba(0, 0, 0, ${particle.alpha * 0.36})`);
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+    context.beginPath();
+    context.fillStyle = gradient;
+    context.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  particles.filter((particle) => particle.light).forEach((particle) => {
+    const wobbleX = Math.sin(now * 0.8 + particle.phase) * particle.wander;
+    const wobbleY = Math.cos(now * 0.6 + particle.phase) * particle.wander;
+    particle.x += (particle.targetX + wobbleX - particle.x) * particle.pull;
+    particle.y += (particle.targetY + wobbleY - particle.y) * particle.pull;
+
+    const radius = particle.size * 2.4;
+    const gradient = context.createRadialGradient(
+      particle.x,
+      particle.y,
+      0,
+      particle.x,
+      particle.y,
+      radius,
+    );
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${particle.alpha * 1.4})`);
+    gradient.addColorStop(0.5, `rgba(255, 255, 255, ${particle.alpha * 0.42})`);
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+    context.beginPath();
+    context.fillStyle = gradient;
+    context.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  state.frame = window.requestAnimationFrame(() => drawHauntedParticles(state));
 }
 
 function setHauntedNumber(number, value) {
   const sign = value.startsWith("-") ? "-" : "";
   const digits = sign ? value.slice(1) : value;
-  const signElement = document.createElement("span");
-  const digitsElement = document.createElement("span");
+  let signElement = number.querySelector(".haunted-sign");
+  let canvas = number.querySelector(".haunted-canvas");
 
-  signElement.className = "haunted-sign";
+  if (!signElement || !canvas) {
+    signElement = document.createElement("span");
+    signElement.className = "haunted-sign";
+
+    canvas = document.createElement("canvas");
+    canvas.className = "haunted-canvas";
+    canvas.width = HAUNTED_CANVAS_WIDTH;
+    canvas.height = HAUNTED_CANVAS_HEIGHT;
+    canvas.setAttribute("aria-hidden", "true");
+
+    const state = {
+      canvas,
+      context: canvas.getContext("2d"),
+      digits: "",
+      frame: 0,
+      particles: [],
+    };
+
+    number.hauntedState = state;
+    number.replaceChildren(signElement, canvas);
+    drawHauntedParticles(state);
+  }
+
   signElement.textContent = sign;
-  digitsElement.className = "haunted-digits";
-  digitsElement.textContent = digits;
-  digitsElement.dataset.digits = digits;
-  digitsElement.append(createHauntedParticles());
-
-  number.replaceChildren(signElement, digitsElement);
   number.dataset.value = value;
   number.dataset.digits = digits;
+
+  if (number.hauntedState?.digits !== digits) {
+    retargetHauntedParticles(number.hauntedState, digits);
+  }
 }
 
 function getFitNumber(person, visibleNumber) {

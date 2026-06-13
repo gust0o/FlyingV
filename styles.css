@@ -113,27 +113,25 @@ body {
   align-items: baseline;
   justify-content: flex-end;
   color: #000000;
-  opacity: 0.86;
-  gap: 0.02em;
+  gap: 0.01em;
   filter: none;
   animation: haunted-number 5.6s ease-in-out infinite;
   will-change: opacity, transform;
 }
 
 .number--haunted::before {
-  right: -0.22em;
-  bottom: -0.18em;
-  left: 0.28em;
+  right: -0.06em;
+  bottom: -0.08em;
+  left: 0.34em;
   z-index: -2;
-  height: 0.94em;
+  height: 0.76em;
   background:
-    radial-gradient(ellipse at 38% 50%, rgba(0, 0, 0, 0.13) 0 13%, transparent 38%),
-    radial-gradient(ellipse at 72% 56%, rgba(0, 0, 0, 0.11) 0 12%, transparent 34%),
-    repeating-radial-gradient(circle, rgba(0, 0, 0, 0.2) 0 0.005em, transparent 0.006em 0.034em);
-  filter: blur(0.1em) contrast(1.65);
-  opacity: 0.52;
-  transform: rotate(-3deg);
-  animation: sand-cloud 6.8s ease-in-out infinite;
+    radial-gradient(ellipse at 44% 52%, rgba(0, 0, 0, 0.08) 0 20%, transparent 58%),
+    radial-gradient(ellipse at 74% 48%, rgba(0, 0, 0, 0.06) 0 18%, transparent 52%);
+  filter: blur(0.08em);
+  opacity: 0.6;
+  transform: rotate(-2deg);
+  animation: orb-haze 7.4s ease-in-out infinite;
 }
 
 .number--haunted::after {
@@ -142,74 +140,18 @@ body {
 
 .haunted-sign {
   display: inline-block;
-  color: rgba(0, 0, 0, 0.64);
-  filter: blur(0.01em);
-  text-shadow: 0.03em 0.02em 0.025em rgba(0, 0, 0, 0.18);
-}
-
-.haunted-digits {
-  position: relative;
-  display: inline-block;
-  color: transparent;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(0, 0, 0, 0.92) 0 0.012em, transparent 0.018em),
-    radial-gradient(circle at 82% 36%, rgba(0, 0, 0, 0.7) 0 0.009em, transparent 0.018em),
-    radial-gradient(circle at 42% 78%, rgba(0, 0, 0, 0.84) 0 0.011em, transparent 0.02em),
-    linear-gradient(93deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.2) 62%, rgba(0, 0, 0, 0.6));
-  background-size:
-    0.115em 0.115em,
-    0.16em 0.13em,
-    0.09em 0.17em,
-    100% 100%;
-  background-position:
-    0 0,
-    0.05em 0.01em,
-    -0.02em 0.04em,
-    0 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  filter: blur(0.012em) contrast(1.7);
-  text-shadow:
-    -0.02em 0.02em 0.018em rgba(0, 0, 0, 0.32),
-    0.07em -0.025em 0.02em rgba(0, 0, 0, 0.2),
-    0.16em 0.08em 0.16em rgba(0, 0, 0, 0.12),
-    0 0 0.32em rgba(0, 0, 0, 0.22);
-  animation:
-    sand-grain-shift 4.8s steps(6, end) infinite,
-    sand-pulse 7.2s ease-in-out infinite;
-  will-change: background-position, filter, opacity;
-}
-
-.haunted-digits::after {
-  position: absolute;
-  inset: -0.34em -0.18em -0.28em -0.16em;
-  z-index: -1;
-  content: attr(data-digits);
-  color: rgba(0, 0, 0, 0.18);
-  filter: blur(0.19em) contrast(1.35);
-  opacity: 0.66;
-  text-align: right;
-  text-shadow:
-    -0.08em -0.02em 0.05em rgba(0, 0, 0, 0.24),
-    0.18em -0.16em 0.12em rgba(0, 0, 0, 0.16),
-    0.42em 0.12em 0.2em rgba(0, 0, 0, 0.12);
-  animation: sand-drift 6.2s ease-in-out infinite;
-  will-change: opacity, transform;
-}
-
-.number-particle {
-  position: absolute;
-  top: var(--y);
-  left: var(--x);
-  z-index: 1;
-  width: var(--size);
-  height: var(--size);
-  pointer-events: none;
-  background: rgba(0, 0, 0, var(--alpha));
-  border-radius: 50%;
+  color: rgba(0, 0, 0, 0.58);
   filter: blur(0.006em);
-  transform: translate(-50%, -50%);
-  animation: particle-drift var(--duration) ease-in-out var(--delay) infinite;
+  text-shadow: 0.02em 0.02em 0.02em rgba(0, 0, 0, 0.12);
+}
+
+.haunted-canvas {
+  display: block;
+  width: 1.2em;
+  height: 0.74em;
+  margin-bottom: -0.04em;
+  opacity: 0.92;
+  filter: blur(0.006em) contrast(1.18);
 }
 
 @keyframes haunted-number {
@@ -226,89 +168,20 @@ body {
   }
 }
 
-@keyframes sand-grain-shift {
+@keyframes orb-haze {
   0% {
-    background-position:
-      0 0,
-      0.05em 0.01em,
-      -0.02em 0.04em,
-      0 0;
+    opacity: 0.22;
+    transform: translate(0.02em, 0.04em) rotate(-2deg) scaleX(0.98);
   }
 
-  100% {
-    background-position:
-      0.12em -0.08em,
-      -0.08em 0.09em,
-      0.07em -0.11em,
-      0 0;
-  }
-}
-
-@keyframes sand-pulse {
-  0% {
-    filter: blur(0.01em) contrast(1.45);
-    opacity: 0.78;
-  }
-
-  45% {
-    filter: blur(0.04em) contrast(2.2);
-    opacity: 0.58;
-  }
-
-  100% {
-    filter: blur(0.018em) contrast(1.7);
-    opacity: 0.86;
-  }
-}
-
-@keyframes sand-cloud {
-  0% {
-    opacity: 0.28;
-    transform: translate(0.02em, 0.06em) rotate(-4deg) scaleX(0.96);
-  }
-
-  38% {
-    opacity: 0.56;
-    transform: translate(0.08em, -0.06em) rotate(2deg) scaleX(1.08);
+  50% {
+    opacity: 0.5;
+    transform: translate(0.08em, -0.04em) rotate(1deg) scaleX(1.08);
   }
 
   100% {
     opacity: 0.2;
-    transform: translate(0.18em, -0.18em) rotate(-6deg) scaleX(1.18);
-  }
-}
-
-@keyframes sand-drift {
-  0% {
-    opacity: 0.72;
-    transform: translate(0.06em, 0.05em) scaleX(0.98) skewX(-5deg);
-  }
-
-  40% {
-    opacity: 0.88;
-    transform: translate(0.08em, -0.16em) scaleX(1.14) skewX(8deg);
-  }
-
-  100% {
-    opacity: 0.16;
-    transform: translate(0.22em, -0.38em) scaleX(1.28) skewX(-10deg);
-  }
-}
-
-@keyframes particle-drift {
-  0% {
-    opacity: var(--alpha-start);
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-
-  45% {
-    opacity: var(--alpha);
-    transform: translate(calc(-50% + var(--drift-x)), calc(-50% + var(--drift-y))) scale(1.35);
-  }
-
-  100% {
-    opacity: var(--alpha-end);
-    transform: translate(calc(-50% + var(--drift-x-end)), calc(-50% + var(--drift-y-end))) scale(0.7);
+    transform: translate(0.16em, -0.12em) rotate(-4deg) scaleX(1.14);
   }
 }
 
