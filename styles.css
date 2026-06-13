@@ -57,14 +57,38 @@ body {
 }
 
 .name {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   overflow-wrap: normal;
   white-space: nowrap;
 }
 
+.name--overflow {
+  display: inline-block;
+  width: max-content;
+  overflow: visible;
+}
+
+.name-overflow-core {
+  position: relative;
+  z-index: 1;
+}
+
+.name-overflow-tail {
+  position: absolute;
+  top: 0;
+  left: calc(100% - 0.08em);
+  z-index: -1;
+  color: rgba(0, 0, 0, 0.18);
+  filter: blur(0.004em);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .number {
   position: relative;
-  z-index: 0;
+  z-index: 2;
   display: inline-grid;
   place-items: center end;
   padding: 0 0.03em;

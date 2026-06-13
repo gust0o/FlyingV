@@ -29,7 +29,6 @@ const people = [
       "Pellimagico",
       "Dejavio",
       "Dario Amodei",
-      "Di vannacciana memoria",
       "Agent AI",
       "Botte Donato",
       "Alien raudo",
@@ -103,7 +102,9 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rattolino: "Rattolino",
   Rocco: "Dejavio",
 };
-const MAGIC_DOG_CHANCE = 100;
+const MAGIC_DOG_CHANCE = 40;
+const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
+const OVERFLOW_ALIAS_CORE = "Puttana";
 
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
@@ -141,6 +142,28 @@ function getMagicDogDisplayName(person, forceMagicDog) {
   }
 
   return getDisplayName(person);
+}
+
+function getFitName(displayName) {
+  return displayName === OVERFLOW_ALIAS ? OVERFLOW_ALIAS_CORE : displayName;
+}
+
+function renderDisplayName(nameElement, displayName) {
+  if (displayName !== OVERFLOW_ALIAS) {
+    nameElement.textContent = displayName;
+    return;
+  }
+
+  const core = document.createElement("span");
+  core.className = "name-overflow-core";
+  core.textContent = OVERFLOW_ALIAS_CORE;
+
+  const tail = document.createElement("span");
+  tail.className = "name-overflow-tail";
+  tail.textContent = displayName.slice(OVERFLOW_ALIAS_CORE.length);
+
+  nameElement.classList.add("name--overflow");
+  nameElement.append(core, tail);
 }
 
 function formatMissingDays(days) {
@@ -233,9 +256,9 @@ function getDigitTargets(digits) {
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#000000";
   context.font = "700 258px Helvetica, Arial, sans-serif";
-  context.textAlign = "center";
+  context.textAlign = "right";
   context.textBaseline = "middle";
-  context.fillText(digits, canvas.width / 2, canvas.height * 0.62);
+  context.fillText(digits, canvas.width - 52, canvas.height * 0.62);
 
   const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
   const targets = [];
@@ -508,7 +531,7 @@ function rowsFit() {
     if (number.dataset.fitValue === "HAUNTED") {
       numberWidth = measureHauntedNumber();
     }
-    const width = measureText(name.textContent)
+    const width = measureText(name.dataset.fitName || name.textContent)
       + numberWidth
       + gap;
 
@@ -560,7 +583,8 @@ function render() {
 
       const name = document.createElement("h1");
       name.className = "name";
-      name.textContent = displayName;
+      name.dataset.fitName = getFitName(displayName);
+      renderDisplayName(name, displayName);
 
       const number = document.createElement("p");
       number.className = "number";
