@@ -372,6 +372,18 @@ body {
 }
 
 @media (max-width: 760px) {
+  :root {
+    --ios-bottom-bleed: max(
+      150px,
+      env(safe-area-inset-bottom),
+      calc(100lvh - 100dvh + env(safe-area-inset-bottom) + 72px)
+    );
+  }
+
+  body {
+    min-height: calc(100dvh + 1px);
+  }
+
   .page {
     justify-content: center;
     padding: 18px 12px 24px;
@@ -397,12 +409,12 @@ body {
 
   .magic-dog {
     right: 50%;
-    width: min(92vw, 420px);
-    max-height: 34vh;
+    width: min(98vw, 500px);
+    max-height: none;
     transform: translate(50%, 105%) rotate(-2deg);
   }
 
   .magic-dog--visible {
-    transform: translate(50%, 20%) rotate(-2deg);
+    transform: translate(50%, 2%) rotate(-2deg);
   }
 }

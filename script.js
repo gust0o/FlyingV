@@ -103,7 +103,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260613-1827";
+const ASSET_VERSION = "20260613-1833";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 
@@ -599,6 +599,20 @@ function preventStaleCache() {
   });
 }
 
+function nudgeMobileBrowserChrome() {
+  if (!window.matchMedia("(max-width: 760px)").matches) {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    window.setTimeout(() => {
+      if (window.scrollY === 0 && document.documentElement.scrollHeight > window.innerHeight) {
+        window.scrollTo(0, 1);
+      }
+    }, 80);
+  });
+}
+
 function render() {
   const displayNames = [];
   const forceMagicDog = shouldForceMagicDog();
@@ -661,4 +675,5 @@ function render() {
 
 render();
 preventStaleCache();
+nudgeMobileBrowserChrome();
 window.addEventListener("resize", scheduleFitTypeSize);
