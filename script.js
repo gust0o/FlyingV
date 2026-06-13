@@ -109,7 +109,7 @@ const OVERFLOW_ALIAS_CORE = "Puttana";
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
 let resizeFrame = 0;
-const HAUNTED_CANVAS_WIDTH = 620;
+const HAUNTED_CANVAS_WIDTH = 360;
 const HAUNTED_CANVAS_HEIGHT = 320;
 const HAUNTED_PARTICLE_COUNT = 1500;
 
@@ -258,7 +258,7 @@ function getDigitTargets(digits) {
   context.font = "700 258px Helvetica, Arial, sans-serif";
   context.textAlign = "right";
   context.textBaseline = "middle";
-  context.fillText(digits, canvas.width - 52, canvas.height * 0.62);
+  context.fillText(digits, canvas.width - 20, canvas.height * 0.62);
 
   const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
   const targets = [];
@@ -516,7 +516,7 @@ function measureCheckMark() {
 
 function measureHauntedNumber() {
   const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
-  return typeSize * 3.18;
+  return typeSize * 2.05;
 }
 
 function rowsFit() {

@@ -200,6 +200,7 @@ body {
 
 .haunted-sign {
   display: inline-block;
+  margin-right: -0.06em;
   color: #000000;
   filter: none;
   line-height: 0.82;
@@ -208,9 +209,9 @@ body {
 
 .haunted-canvas {
   display: block;
-  width: 2.65em;
+  width: 1.5em;
   height: 1.2em;
-  margin: -0.42em -0.2em -0.2em -0.16em;
+  margin: -0.42em -0.12em -0.2em -0.03em;
   opacity: 0.98;
   filter: blur(0.018em) contrast(1.06);
 }
@@ -218,10 +219,10 @@ body {
 .magic-dog {
   position: fixed;
   right: clamp(12px, 5vw, 84px);
-  bottom: 0;
+  bottom: calc(-1 * max(32px, env(safe-area-inset-bottom)));
   z-index: 20;
   width: min(52vw, 520px);
-  max-height: 48vh;
+  max-height: 64dvh;
   pointer-events: none;
   opacity: 0;
   object-fit: contain;
@@ -235,7 +236,7 @@ body {
 
 .magic-dog--visible {
   opacity: 1;
-  transform: translateY(18%) rotate(-2deg);
+  transform: translateY(28%) rotate(-2deg);
 }
 
 @keyframes electric-shock {
