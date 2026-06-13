@@ -105,6 +105,10 @@ function getDaysUntil(dateString, now = new Date()) {
   return Math.max(0, Math.ceil((target - today) / MS_PER_DAY));
 }
 
+function hasArrived(person) {
+  return Boolean(person.arrivalDate) && getDaysUntil(person.arrivalDate) === 0;
+}
+
 function getHauntedArrivalDate(person) {
   if (!person.runtimeArrivalDate) {
     const date = parseLocalDate(person.hauntedDate);
@@ -136,6 +140,21 @@ function getNumber(person) {
   return formatMissingDays(getDaysUntil(person.arrivalDate));
 }
 
+function createCheckMark() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "check-mark");
+  svg.setAttribute("viewBox", "0 0 100 74");
+  svg.setAttribute("aria-label", "arrivato");
+  svg.setAttribute("role", "img");
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M10 35 L38 63 L90 9");
+  path.setAttribute("pathLength", "1");
+  svg.append(path);
+
+  return svg;
+}
+
 function getFitNumber(person, visibleNumber) {
   if (person.randomRange) {
     const maxMagnitude = Math.max(Math.abs(person.randomRange[0]), Math.abs(person.randomRange[1]));
@@ -144,6 +163,10 @@ function getFitNumber(person, visibleNumber) {
 
   if (person.hauntedDate) {
     return "-70";
+  }
+
+  if (hasArrived(person)) {
+    return "V";
   }
 
   return visibleNumber;
@@ -170,13 +193,21 @@ function measureText(text, includeNumberPadding = false) {
   return width;
 }
 
+function measureCheckMark() {
+  const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
+  return typeSize * 1.15;
+}
+
 function rowsFit() {
   return Array.from(list.querySelectorAll(".countdown-row")).every((row) => {
     const name = row.querySelector(".name");
     const number = row.querySelector(".number");
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+    const numberWidth = number.dataset.fitValue === "V"
+      ? measureCheckMark()
+      : measureText(number.dataset.fitValue, true);
     const width = measureText(name.textContent)
-      + measureText(number.dataset.fitValue, true)
+      + numberWidth
       + gap;
 
     return width <= row.getBoundingClientRect().width;
@@ -234,6 +265,12 @@ function render() {
       number.textContent = getNumber(person);
       number.dataset.value = number.textContent;
       number.dataset.fitValue = getFitNumber(person, number.textContent);
+      if (hasArrived(person)) {
+        number.classList.add("number--arrived");
+        number.textContent = "";
+        number.dataset.value = "";
+        number.append(createCheckMark());
+      }
 
       if (person.randomRange && person.intervalMs) {
         window.setInterval(() => {

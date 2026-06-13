@@ -60,6 +60,8 @@ body {
 .number {
   position: relative;
   z-index: 0;
+  display: inline-grid;
+  place-items: center end;
   padding: 0 0.03em;
   text-align: right;
   white-space: nowrap;
@@ -76,6 +78,33 @@ body {
   background: #b7ff35;
   transform: rotate(-1.5deg);
   transform-origin: center;
+}
+
+.number--arrived {
+  width: 1.15em;
+  height: 0.82em;
+}
+
+.number--arrived::before {
+  right: -0.04em;
+  bottom: 0.03em;
+  left: -0.04em;
+}
+
+.check-mark {
+  display: block;
+  width: 1.1em;
+  height: 0.82em;
+  overflow: visible;
+}
+
+.check-mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 16;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
 }
 
 .number--haunted {
