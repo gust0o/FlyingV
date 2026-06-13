@@ -103,6 +103,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
+const ASSET_VERSION = "20260613-1827";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 
@@ -144,12 +145,16 @@ function getMagicDogDisplayName(person, forceMagicDog) {
   return getDisplayName(person);
 }
 
-function getFitName(displayName) {
-  return displayName === OVERFLOW_ALIAS ? OVERFLOW_ALIAS_CORE : displayName;
+function hasOverflowAlias(person, displayName) {
+  return person.name === "Rocco" && displayName === OVERFLOW_ALIAS;
 }
 
-function renderDisplayName(nameElement, displayName) {
-  if (displayName !== OVERFLOW_ALIAS) {
+function getFitName(person, displayName) {
+  return hasOverflowAlias(person, displayName) ? OVERFLOW_ALIAS_CORE : displayName;
+}
+
+function renderDisplayName(nameElement, person, displayName) {
+  if (!hasOverflowAlias(person, displayName)) {
     nameElement.textContent = displayName;
     return;
   }
@@ -460,7 +465,7 @@ function showMagicDog(displayNames) {
 
   const dog = existingDog || document.createElement("img");
   dog.className = "magic-dog";
-  dog.src = "assets/canemagico.png";
+  dog.src = `assets/canemagico.png?v=${ASSET_VERSION}`;
   dog.alt = "Cane magico";
   dog.decoding = "async";
 
@@ -581,6 +586,19 @@ function scheduleFitTypeSize() {
   resizeFrame = window.requestAnimationFrame(fitTypeSize);
 }
 
+function preventStaleCache() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register(`./sw.js?v=${ASSET_VERSION}`, { updateViaCache: "none" })
+      .then((registration) => registration.update())
+      .catch(() => {});
+  });
+}
+
 function render() {
   const displayNames = [];
   const forceMagicDog = shouldForceMagicDog();
@@ -597,8 +615,8 @@ function render() {
 
       const name = document.createElement("h1");
       name.className = "name";
-      name.dataset.fitName = getFitName(displayName);
-      renderDisplayName(name, displayName);
+      name.dataset.fitName = getFitName(person, displayName);
+      renderDisplayName(name, person, displayName);
 
       const number = document.createElement("p");
       number.className = "number";
@@ -642,4 +660,5 @@ function render() {
 }
 
 render();
+preventStaleCache();
 window.addEventListener("resize", scheduleFitTypeSize);
