@@ -93,6 +93,17 @@ const MAGIC_DOG_NAMES = [
   "Rattolino",
   "Giacoooooo",
 ];
+const MAGIC_DOG_NAME_BY_PERSON = {
+  Ciccio: "Alcuni Gufi",
+  Esse: "Giacoooooo",
+  Giulius: "Bibubibi",
+  Gusto: "El Pequeño",
+  Jarbo: "Gobu",
+  Nardo: "Doremirko",
+  Rattolino: "Rattolino",
+  Rocco: "Dejavio",
+};
+const MAGIC_DOG_CHANCE = 100;
 
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
@@ -118,6 +129,18 @@ function shuffle(items) {
 
 function getDisplayName(person) {
   return person.aliases[getRandomInt(0, person.aliases.length - 1)];
+}
+
+function shouldForceMagicDog() {
+  return getRandomInt(1, MAGIC_DOG_CHANCE) === MAGIC_DOG_CHANCE;
+}
+
+function getMagicDogDisplayName(person, forceMagicDog) {
+  if (forceMagicDog) {
+    return MAGIC_DOG_NAME_BY_PERSON[person.name];
+  }
+
+  return getDisplayName(person);
 }
 
 function formatMissingDays(days) {
@@ -420,9 +443,8 @@ function showMagicDog(displayNames) {
 
   if (!existingDog) {
     document.body.append(dog);
-    window.requestAnimationFrame(() => {
-      dog.classList.add("magic-dog--visible");
-    });
+    dog.getBoundingClientRect();
+    dog.classList.add("magic-dog--visible");
   }
 }
 
@@ -524,10 +546,11 @@ function scheduleFitTypeSize() {
 
 function render() {
   const displayNames = [];
+  const forceMagicDog = shouldForceMagicDog();
 
   list.replaceChildren(
     ...shuffle(people).map((person) => {
-      const displayName = getDisplayName(person);
+      const displayName = getMagicDogDisplayName(person, forceMagicDog);
       displayNames.push(displayName);
       const row = document.createElement("article");
       row.className = "countdown-row";
