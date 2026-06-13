@@ -28,8 +28,10 @@ const people = [
       "Pellicano",
       "Pellimagico",
     ],
-    randomRange: [-1, 365],
-    intervalMs: 500,
+    randomRange: [1, 99],
+    minIntervalMs: 500,
+    maxIntervalMs: 3000,
+    shockMs: 260,
   },
   { name: "Jarbo", aliases: ["Jarbo", "Jarbolone", "Gobu", "Giambadabro"], randomSymbol: true },
   {
@@ -334,6 +336,30 @@ function setHauntedNumber(number, value) {
   }
 }
 
+function triggerRandomNumberChange(person, number) {
+  number.classList.add("number--shocking");
+
+  window.setTimeout(() => {
+    number.textContent = getNumber(person);
+    number.dataset.value = number.textContent;
+    number.classList.remove("number--shocking");
+    number.classList.add("number--changed");
+
+    window.setTimeout(() => {
+      number.classList.remove("number--changed");
+    }, 180);
+
+    scheduleRandomNumberChange(person, number);
+  }, person.shockMs);
+}
+
+function scheduleRandomNumberChange(person, number) {
+  const delay = getRandomInt(person.minIntervalMs, person.maxIntervalMs);
+  window.setTimeout(() => {
+    triggerRandomNumberChange(person, number);
+  }, delay);
+}
+
 function getFitNumber(person, visibleNumber) {
   if (person.randomRange) {
     const maxMagnitude = Math.max(Math.abs(person.randomRange[0]), Math.abs(person.randomRange[1]));
@@ -451,11 +477,9 @@ function render() {
         number.append(createCheckMark());
       }
 
-      if (person.randomRange && person.intervalMs) {
-        window.setInterval(() => {
-          number.textContent = getNumber(person);
-          number.dataset.value = number.textContent;
-        }, person.intervalMs);
+      if (person.randomRange && person.minIntervalMs && person.maxIntervalMs) {
+        number.classList.add("number--electric");
+        scheduleRandomNumberChange(person, number);
       }
 
       if (person.hauntedDate) {
