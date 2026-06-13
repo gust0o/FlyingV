@@ -539,12 +539,26 @@ function rowsFit() {
   });
 }
 
+function listFitsViewport() {
+  const page = document.querySelector(".page");
+  const pageStyle = getComputedStyle(page);
+  const availableHeight = window.innerHeight
+    - parseFloat(pageStyle.paddingTop)
+    - parseFloat(pageStyle.paddingBottom);
+
+  return list.getBoundingClientRect().height <= availableHeight;
+}
+
+function layoutFits() {
+  return rowsFit() && listFitsViewport();
+}
+
 function fitTypeSize() {
   if (!list.children.length) {
     return;
   }
 
-  const maxSize = Math.min(window.innerWidth * 0.16, 180);
+  const maxSize = Math.min(window.innerWidth * 0.16, window.innerHeight * 0.14, 180);
   let low = 14;
   let high = maxSize;
 
@@ -552,7 +566,7 @@ function fitTypeSize() {
     const middle = (low + high) / 2;
     root.style.setProperty("--type-size", `${middle}px`);
 
-    if (rowsFit()) {
+    if (layoutFits()) {
       low = middle;
     } else {
       high = middle;
