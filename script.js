@@ -1,6 +1,6 @@
 const people = [
   { name: "Giulius", aliases: ["Giulius", "Bibubibi", "Andrea"], infinite: true },
-  { name: "Gusto", aliases: ["Gusto", "Gustavo", "Gepo", "Glep", "El Pequeno"], infinite: true },
+  { name: "Gusto", aliases: ["Gusto", "Gustavo", "Gepo", "Glep", "El Pequeño"], infinite: true },
   {
     name: "Esse",
     aliases: [
@@ -27,6 +27,7 @@ const people = [
       "Enrica Riera",
       "Pellicano",
       "Pellimagico",
+      "Dejavio",
     ],
     randomRange: [1, 99],
     minIntervalMs: 500,
@@ -68,6 +69,16 @@ const STRANGE_SYMBOLS = [
   "Ꮔ",
   "𐊃",
   "𐊄𐦞𐦆",
+];
+const MAGIC_DOG_NAMES = [
+  "El Pequeño",
+  "Dejavio",
+  "Bibubibi",
+  "Doremirko",
+  "Gobu",
+  "Alcuni Gufi",
+  "Rattolino",
+  "Giacoooooo",
 ];
 
 const list = document.querySelector("#countdown-list");
@@ -372,6 +383,36 @@ function scheduleRandomNumberChange(person, number) {
   }, delay);
 }
 
+function hasMagicDogNames(displayNames) {
+  if (displayNames.length !== MAGIC_DOG_NAMES.length) {
+    return false;
+  }
+
+  const selected = new Set(displayNames);
+  return MAGIC_DOG_NAMES.every((name) => selected.has(name));
+}
+
+function showMagicDog(displayNames) {
+  const existingDog = document.querySelector(".magic-dog");
+  if (!hasMagicDogNames(displayNames)) {
+    existingDog?.remove();
+    return;
+  }
+
+  const dog = existingDog || document.createElement("img");
+  dog.className = "magic-dog";
+  dog.src = "assets/canemagico.png";
+  dog.alt = "Cane magico";
+  dog.decoding = "async";
+
+  if (!existingDog) {
+    document.body.append(dog);
+    window.requestAnimationFrame(() => {
+      dog.classList.add("magic-dog--visible");
+    });
+  }
+}
+
 function getFitNumber(person, visibleNumber) {
   if (person.randomRange) {
     const maxMagnitude = Math.max(Math.abs(person.randomRange[0]), Math.abs(person.randomRange[1]));
@@ -469,9 +510,12 @@ function scheduleFitTypeSize() {
 }
 
 function render() {
+  const displayNames = [];
+
   list.replaceChildren(
     ...shuffle(people).map((person) => {
       const displayName = getDisplayName(person);
+      displayNames.push(displayName);
       const row = document.createElement("article");
       row.className = "countdown-row";
       if (person.hauntedDate) {
@@ -519,6 +563,7 @@ function render() {
     }),
   );
 
+  showMagicDog(displayNames);
   scheduleFitTypeSize();
 }
 

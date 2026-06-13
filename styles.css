@@ -191,6 +191,29 @@ body {
   filter: blur(0.018em) contrast(1.06);
 }
 
+.magic-dog {
+  position: fixed;
+  right: clamp(12px, 5vw, 84px);
+  bottom: 0;
+  z-index: 20;
+  width: min(52vw, 520px);
+  max-height: 48vh;
+  pointer-events: none;
+  opacity: 0;
+  object-fit: contain;
+  object-position: bottom right;
+  transform: translateY(105%) rotate(-2deg);
+  transform-origin: bottom center;
+  transition:
+    opacity 0.28s ease,
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.magic-dog--visible {
+  opacity: 1;
+  transform: translateY(18%) rotate(-2deg);
+}
+
 @keyframes electric-shock {
   0% {
     transform: translate(0, 0) skewX(0deg);
@@ -284,5 +307,16 @@ body {
 
   .number {
     text-align: right;
+  }
+
+  .magic-dog {
+    right: 50%;
+    width: min(92vw, 420px);
+    max-height: 34vh;
+    transform: translate(50%, 105%) rotate(-2deg);
+  }
+
+  .magic-dog--visible {
+    transform: translate(50%, 20%) rotate(-2deg);
   }
 }
