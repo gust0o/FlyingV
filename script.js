@@ -73,9 +73,9 @@ const STRANGE_SYMBOLS = [
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
 let resizeFrame = 0;
-const HAUNTED_CANVAS_WIDTH = 320;
-const HAUNTED_CANVAS_HEIGHT = 170;
-const HAUNTED_PARTICLE_COUNT = 420;
+const HAUNTED_CANVAS_WIDTH = 440;
+const HAUNTED_CANVAS_HEIGHT = 230;
+const HAUNTED_PARTICLE_COUNT = 920;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -185,18 +185,18 @@ function getDigitTargets(digits) {
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#000000";
-  context.font = "700 132px Helvetica, Arial, sans-serif";
+  context.font = "700 184px Helvetica, Arial, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText(digits, canvas.width / 2, canvas.height * 0.55);
+  context.fillText(digits, canvas.width / 2, canvas.height * 0.57);
 
   const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
   const targets = [];
 
-  for (let y = 4; y < canvas.height; y += 4) {
-    for (let x = 4; x < canvas.width; x += 4) {
+  for (let y = 4; y < canvas.height; y += 3) {
+    for (let x = 4; x < canvas.width; x += 3) {
       const alpha = pixels[((y * canvas.width + x) * 4) + 3];
-      if (alpha > 80 && Math.random() > 0.34) {
+      if (alpha > 56 && Math.random() > 0.2) {
         targets.push({ x, y, alpha: alpha / 255 });
       }
     }
@@ -207,15 +207,17 @@ function getDigitTargets(digits) {
 
 function createHauntedParticle(target) {
   return {
-    x: target.x + getRandomInt(-46, 46),
-    y: target.y + getRandomInt(-34, 34),
+    x: target.x + getRandomInt(-56, 56),
+    y: target.y + getRandomInt(-22, 48),
     targetX: target.x,
     targetY: target.y,
-    size: getRandomInt(28, 72) / 10,
-    alpha: 0.09 + target.alpha * 0.43,
+    size: getRandomInt(34, 92) / 10,
+    alpha: 0.06 + target.alpha * 0.31,
     light: Math.random() > 0.78,
-    pull: 0.014 + Math.random() * 0.028,
-    wander: 0.42 + Math.random() * 0.82,
+    pull: 0.01 + Math.random() * 0.024,
+    rise: 18 + Math.random() * 58,
+    smokeSpeed: 0.06 + Math.random() * 0.14,
+    wander: 0.7 + Math.random() * 1.6,
     phase: Math.random() * Math.PI * 2,
   };
 }
@@ -233,8 +235,10 @@ function retargetHauntedParticles(state, digits) {
     const particle = state.particles[index];
     particle.targetX = target.x + getRandomInt(-4, 4);
     particle.targetY = target.y + getRandomInt(-4, 4);
-    particle.alpha = 0.09 + target.alpha * 0.43;
+    particle.alpha = 0.06 + target.alpha * 0.31;
     particle.light = Math.random() > 0.78;
+    particle.rise = 18 + Math.random() * 58;
+    particle.smokeSpeed = 0.06 + Math.random() * 0.14;
   });
 }
 
@@ -250,23 +254,27 @@ function drawHauntedParticles(state) {
     particle.x += (particle.targetX + wobbleX - particle.x) * particle.pull;
     particle.y += (particle.targetY + wobbleY - particle.y) * particle.pull;
 
-    const radius = particle.size * 3;
+    const smoke = (now * particle.smokeSpeed + particle.phase) % 1;
+    const drawX = particle.x + Math.sin(smoke * Math.PI * 2 + particle.phase) * 9 * smoke;
+    const drawY = particle.y - particle.rise * smoke;
+    const drawAlpha = particle.alpha * (1 - smoke * 0.42);
+    const radius = particle.size * (3.2 + smoke * 1.2);
     const gradient = context.createRadialGradient(
-      particle.x,
-      particle.y,
+      drawX,
+      drawY,
       0,
-      particle.x,
-      particle.y,
+      drawX,
+      drawY,
       radius,
     );
 
-    gradient.addColorStop(0, `rgba(0, 0, 0, ${particle.alpha})`);
-    gradient.addColorStop(0.46, `rgba(0, 0, 0, ${particle.alpha * 0.36})`);
+    gradient.addColorStop(0, `rgba(0, 0, 0, ${drawAlpha})`);
+    gradient.addColorStop(0.5, `rgba(0, 0, 0, ${drawAlpha * 0.32})`);
     gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
 
     context.beginPath();
     context.fillStyle = gradient;
-    context.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+    context.arc(drawX, drawY, radius, 0, Math.PI * 2);
     context.fill();
   });
 
@@ -276,22 +284,26 @@ function drawHauntedParticles(state) {
     particle.x += (particle.targetX + wobbleX - particle.x) * particle.pull;
     particle.y += (particle.targetY + wobbleY - particle.y) * particle.pull;
 
-    const radius = particle.size * 2.4;
+    const smoke = (now * particle.smokeSpeed + particle.phase) % 1;
+    const drawX = particle.x + Math.cos(smoke * Math.PI * 2 + particle.phase) * 7 * smoke;
+    const drawY = particle.y - particle.rise * smoke;
+    const drawAlpha = particle.alpha * (1 - smoke * 0.5);
+    const radius = particle.size * (2.5 + smoke * 0.9);
     const gradient = context.createRadialGradient(
-      particle.x,
-      particle.y,
+      drawX,
+      drawY,
       0,
-      particle.x,
-      particle.y,
+      drawX,
+      drawY,
       radius,
     );
-    gradient.addColorStop(0, `rgba(255, 255, 255, ${particle.alpha * 1.4})`);
-    gradient.addColorStop(0.5, `rgba(255, 255, 255, ${particle.alpha * 0.42})`);
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${drawAlpha * 1.65})`);
+    gradient.addColorStop(0.48, `rgba(255, 255, 255, ${drawAlpha * 0.5})`);
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 
     context.beginPath();
     context.fillStyle = gradient;
-    context.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+    context.arc(drawX, drawY, radius, 0, Math.PI * 2);
     context.fill();
   });
 
@@ -367,7 +379,7 @@ function getFitNumber(person, visibleNumber) {
   }
 
   if (person.hauntedDate) {
-    return "-70";
+    return "HAUNTED";
   }
 
   if (hasArrived(person)) {
@@ -403,14 +415,23 @@ function measureCheckMark() {
   return typeSize * 1.15;
 }
 
+function measureHauntedNumber() {
+  const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
+  return typeSize * 2.2;
+}
+
 function rowsFit() {
   return Array.from(list.querySelectorAll(".countdown-row")).every((row) => {
     const name = row.querySelector(".name");
     const number = row.querySelector(".number");
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
-    const numberWidth = number.dataset.fitValue === "V"
-      ? measureCheckMark()
-      : measureText(number.dataset.fitValue, true);
+    let numberWidth = measureText(number.dataset.fitValue, true);
+    if (number.dataset.fitValue === "V") {
+      numberWidth = measureCheckMark();
+    }
+    if (number.dataset.fitValue === "HAUNTED") {
+      numberWidth = measureHauntedNumber();
+    }
     const width = measureText(name.textContent)
       + numberWidth
       + gap;

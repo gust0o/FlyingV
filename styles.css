@@ -145,28 +145,26 @@ body {
 .number--haunted {
   isolation: isolate;
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: flex-end;
   color: #000000;
-  gap: 0.01em;
+  gap: 0;
   filter: none;
   animation: haunted-number 5.6s ease-in-out infinite;
   will-change: opacity, transform;
 }
 
 .number--haunted::before {
-  right: -0.06em;
-  bottom: -0.08em;
-  left: 0.34em;
-  z-index: -2;
-  height: 0.76em;
-  background:
-    radial-gradient(ellipse at 44% 52%, rgba(0, 0, 0, 0.08) 0 20%, transparent 58%),
-    radial-gradient(ellipse at 74% 48%, rgba(0, 0, 0, 0.06) 0 18%, transparent 52%);
-  filter: blur(0.08em);
-  opacity: 0.6;
-  transform: rotate(-2deg);
-  animation: orb-haze 7.4s ease-in-out infinite;
+  right: -0.08em;
+  bottom: 0.03em;
+  left: -0.08em;
+  z-index: -1;
+  height: 0.36em;
+  background: #b7ff35;
+  filter: none;
+  opacity: 1;
+  transform: rotate(-1.5deg);
+  animation: none;
 }
 
 .number--haunted::after {
@@ -177,16 +175,17 @@ body {
   display: inline-block;
   color: rgba(0, 0, 0, 0.58);
   filter: blur(0.006em);
+  line-height: 0.82;
   text-shadow: 0.02em 0.02em 0.02em rgba(0, 0, 0, 0.12);
 }
 
 .haunted-canvas {
   display: block;
-  width: 1.2em;
-  height: 0.74em;
-  margin-bottom: -0.04em;
-  opacity: 0.92;
-  filter: blur(0.006em) contrast(1.18);
+  width: 1.68em;
+  height: 0.9em;
+  margin: -0.18em -0.06em -0.13em -0.08em;
+  opacity: 0.96;
+  filter: blur(0.01em) contrast(1.08);
 }
 
 @keyframes haunted-number {
