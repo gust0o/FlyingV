@@ -43,7 +43,7 @@ const people = [
       "Alien raudo",
       "Rudy Giuliani",
       "Patriota",
-      "Latte materno",
+      "Latte Materno",
       "Grosseto",
       "Puttanaaaaaaaaaaaaaaaaaa",
       "John Thernus",
@@ -112,7 +112,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260614-1705";
+const ASSET_VERSION = "20260614-1715";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
