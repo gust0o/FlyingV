@@ -112,7 +112,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260614-1115";
+const ASSET_VERSION = "20260614-1605";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 
@@ -556,6 +556,44 @@ function getFitNumber(person, visibleNumber) {
   return visibleNumber;
 }
 
+function getMissingDaysRank(visibleNumber) {
+  const match = visibleNumber.match(/^-([0-9]+)$/);
+  return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+}
+
+function isInCalabria(person, visibleNumber) {
+  return visibleNumber === "\u221e" || hasArrived(person);
+}
+
+function getSortedEntries(entries) {
+  const away = [];
+  const home = [];
+
+  entries.forEach((entry) => {
+    if (isInCalabria(entry.person, entry.initialNumber)) {
+      home.push(entry);
+      return;
+    }
+
+    away.push(entry);
+  });
+
+  const sortedAway = away
+    .map((entry) => ({
+      ...entry,
+      sortRank: getMissingDaysRank(entry.initialNumber),
+    }))
+    .sort((left, right) => {
+      if (left.sortRank !== right.sortRank) {
+        return left.sortRank - right.sortRank;
+      }
+
+      return left.tieBreak - right.tieBreak;
+    });
+
+  return [...sortedAway, ...shuffle(home)];
+}
+
 function measureText(text, includeNumberPadding = false) {
   const measure = document.createElement("span");
   measure.textContent = text;
@@ -683,13 +721,21 @@ function nudgeMobileBrowserChrome() {
 }
 
 function render() {
-  const displayNames = [];
   const forceMagicDog = shouldForceMagicDog();
+  const entries = people.map((person) => {
+    const displayName = getMagicDogDisplayName(person, forceMagicDog);
+
+    return {
+      person,
+      displayName,
+      initialNumber: getNumber(person),
+      tieBreak: Math.random(),
+    };
+  });
+  const displayNames = entries.map((entry) => entry.displayName);
 
   list.replaceChildren(
-    ...shuffle(people).map((person) => {
-      const displayName = getMagicDogDisplayName(person, forceMagicDog);
-      displayNames.push(displayName);
+    ...getSortedEntries(entries).map(({ person, displayName, initialNumber }) => {
       const row = document.createElement("article");
       row.className = "countdown-row";
       if (person.hauntedDate) {
@@ -707,7 +753,7 @@ function render() {
         number.classList.add("number--haunted");
       }
       number.dataset.name = person.name;
-      number.textContent = getNumber(person);
+      number.textContent = initialNumber;
       number.dataset.value = number.textContent;
       number.dataset.fitValue = getFitNumber(person, number.textContent);
       if (isMonacoTripMystery(person, number.textContent)) {
