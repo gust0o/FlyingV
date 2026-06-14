@@ -1,6 +1,15 @@
 const people = [
   { name: "Giulius", aliases: ["Giulius", "Bibubibi", "Andrea"], infinite: true },
-  { name: "Gusto", aliases: ["Gusto", "Gustavo", "Gepo", "Glep", "El Pequeño"], infinite: true },
+  {
+    name: "Gusto",
+    aliases: ["Gusto", "Gustavo", "Gepo", "Glep", "El Pequeño"],
+    infinite: true,
+    monacoTrip: {
+      departureTime: "2026-06-27T11:00",
+      revealTime: "2026-06-27T20:00",
+      returnDate: "2026-06-30",
+    },
+  },
   {
     name: "Esse",
     aliases: [
@@ -103,7 +112,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260614-1052";
+const ASSET_VERSION = "20260614-1115";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 
@@ -191,6 +200,13 @@ function parseLocalDate(dateString) {
   return new Date(year, month - 1, day);
 }
 
+function parseLocalDateTime(dateTimeString) {
+  const [datePart, timePart] = dateTimeString.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes);
+}
+
 function getDaysUntil(dateString, now = new Date()) {
   const today = startOfLocalDay(now);
   const target = startOfLocalDay(parseLocalDate(dateString));
@@ -217,7 +233,36 @@ function resetHauntedArrivalDate(person) {
   return getHauntedArrivalDate(person);
 }
 
-function getNumber(person) {
+function getMonacoTripNumber(person, now = new Date()) {
+  const { departureTime, revealTime, returnDate } = person.monacoTrip;
+  const departure = parseLocalDateTime(departureTime);
+  const reveal = parseLocalDateTime(revealTime);
+  const returnStart = startOfLocalDay(parseLocalDate(returnDate));
+
+  if (now < departure) {
+    return "\u221e";
+  }
+
+  if (now < reveal) {
+    return "?";
+  }
+
+  if (now < returnStart) {
+    return formatMissingDays(getDaysUntil(returnDate, now));
+  }
+
+  return "\u221e";
+}
+
+function isMonacoTripMystery(person, visibleNumber) {
+  return Boolean(person.monacoTrip) && visibleNumber === "?";
+}
+
+function getNumber(person, now = new Date()) {
+  if (person.monacoTrip) {
+    return getMonacoTripNumber(person, now);
+  }
+
   if (person.infinite) {
     return "\u221e";
   }
@@ -447,6 +492,20 @@ function scheduleRandomNumberChange(person, number) {
   }, delay);
 }
 
+function updateMonacoTripNumber(person, number) {
+  number.textContent = getNumber(person);
+  number.dataset.value = number.textContent;
+  number.dataset.fitValue = getFitNumber(person, number.textContent);
+  number.classList.toggle("number--mystery", isMonacoTripMystery(person, number.textContent));
+  scheduleFitTypeSize();
+}
+
+function scheduleMonacoTripRefresh(person, number) {
+  window.setInterval(() => {
+    updateMonacoTripNumber(person, number);
+  }, 60 * 1000);
+}
+
 function hasMagicDogNames(displayNames) {
   if (displayNames.length !== MAGIC_DOG_NAMES.length) {
     return false;
@@ -477,6 +536,10 @@ function showMagicDog(displayNames) {
 }
 
 function getFitNumber(person, visibleNumber) {
+  if (person.monacoTrip) {
+    return "-3";
+  }
+
   if (person.randomRange) {
     const maxMagnitude = Math.max(Math.abs(person.randomRange[0]), Math.abs(person.randomRange[1]));
     return formatMissingDays(maxMagnitude);
@@ -647,6 +710,9 @@ function render() {
       number.textContent = getNumber(person);
       number.dataset.value = number.textContent;
       number.dataset.fitValue = getFitNumber(person, number.textContent);
+      if (isMonacoTripMystery(person, number.textContent)) {
+        number.classList.add("number--mystery");
+      }
       if (hasArrived(person)) {
         number.classList.add("number--arrived");
         number.textContent = "";
@@ -657,6 +723,10 @@ function render() {
       if (person.randomRange && person.minIntervalMs && person.maxIntervalMs) {
         number.classList.add("number--electric");
         scheduleRandomNumberChange(person, number);
+      }
+
+      if (person.monacoTrip) {
+        scheduleMonacoTripRefresh(person, number);
       }
 
       if (person.hauntedDate) {

@@ -175,6 +175,14 @@ body {
   animation: electric-settle 0.18s ease-out;
 }
 
+.number--mystery {
+  animation: mystery-pulse 1.8s ease-in-out infinite;
+}
+
+.number--mystery::before {
+  transform: rotate(1.6deg) scaleX(1.14);
+}
+
 .check-mark {
   display: block;
   width: 1.1em;
@@ -304,6 +312,24 @@ body {
 
   100% {
     transform: translate(0.008em, 0.004em) skewX(1.2deg);
+  }
+}
+
+@keyframes mystery-pulse {
+  0%,
+  100% {
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
+  45% {
+    filter: blur(0.018em);
+    transform: translateY(-0.018em) rotate(-1deg);
+  }
+
+  70% {
+    filter: blur(0.006em);
+    transform: translateY(0.01em) rotate(0.6deg);
   }
 }
 
