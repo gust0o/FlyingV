@@ -95,6 +95,10 @@ body {
   );
 }
 
+.name--small-paolo {
+  font-size: calc(var(--type-size) * 0.84);
+}
+
 .name--overflow {
   transform-origin: left 58%;
 }

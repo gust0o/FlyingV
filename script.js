@@ -26,7 +26,11 @@ const people = [
     infinite: true,
   },
   { name: "Ciccio", aliases: ["Ciccio", "Alcuni Gufi", "De Rose", "Millepose"], arrivalDate: "2026-08-08" },
-  { name: "Nardo", aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko"], arrivalDate: "2026-06-18" },
+  {
+    name: "Nardo",
+    aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko", "Paolo", "Pablo Antonio", "Paolo A."],
+    arrivalDate: "2026-06-18",
+  },
   {
     name: "Rocco",
     aliases: [
@@ -112,7 +116,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-0945";
+const ASSET_VERSION = "20260615-1015";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -172,6 +176,10 @@ function shouldWatchNameCoverage(displayName) {
 
 function renderDisplayName(nameElement, person, displayName) {
   nameElement.dataset.fullName = displayName;
+
+  if (person.name === "Nardo" && displayName === "Paolo") {
+    nameElement.classList.add("name--small-paolo");
+  }
 
   if (shouldWatchNameCoverage(displayName)) {
     nameElement.classList.add("name--coverage-watch");
