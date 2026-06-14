@@ -97,7 +97,14 @@ body {
 
 .name--overflow {
   transform-origin: left 58%;
-  animation: shouted-name 0.18s steps(2, end) infinite;
+}
+
+.name-overflow-char {
+  display: inline-block;
+  transform-origin: 50% 62%;
+  animation: shouted-character 0.34s steps(2, end) infinite;
+  animation-delay: var(--char-delay, 0s);
+  will-change: transform;
 }
 
 .number {
@@ -288,25 +295,55 @@ body {
   }
 }
 
-@keyframes shouted-name {
+@keyframes shouted-character {
   0% {
-    transform: translate(0, 0) skewX(0deg);
+    transform:
+      translate(
+        calc(var(--char-shake, 0) * 0.003em),
+        calc(var(--char-shake, 0) * -0.002em)
+      )
+      rotate(calc(var(--char-angle, 0deg) * 0.12))
+      skewX(calc(var(--char-shake, 0) * 0.4deg));
   }
 
   24% {
-    transform: translate(-0.012em, 0.006em) skewX(-1.8deg);
+    transform:
+      translate(
+        calc(var(--char-shake, 0) * -0.026em),
+        calc(var(--char-shake, 0) * 0.016em)
+      )
+      rotate(calc(var(--char-angle, 0deg) * -1))
+      skewX(calc(var(--char-shake, 0) * -2.8deg));
   }
 
   50% {
-    transform: translate(0.01em, -0.006em) skewX(1.4deg);
+    transform:
+      translate(
+        calc(var(--char-shake, 0) * 0.022em),
+        calc(var(--char-shake, 0) * -0.018em)
+      )
+      rotate(calc(var(--char-angle, 0deg) * 0.84))
+      skewX(calc(var(--char-shake, 0) * 2.2deg));
   }
 
   76% {
-    transform: translate(-0.006em, -0.004em) skewX(-1deg);
+    transform:
+      translate(
+        calc(var(--char-shake, 0) * -0.014em),
+        calc(var(--char-shake, 0) * -0.011em)
+      )
+      rotate(calc(var(--char-angle, 0deg) * -0.55))
+      skewX(calc(var(--char-shake, 0) * -1.7deg));
   }
 
   100% {
-    transform: translate(0.008em, 0.004em) skewX(1.2deg);
+    transform:
+      translate(
+        calc(var(--char-shake, 0) * 0.018em),
+        calc(var(--char-shake, 0) * 0.012em)
+      )
+      rotate(calc(var(--char-angle, 0deg) * 0.62))
+      skewX(calc(var(--char-shake, 0) * 1.9deg));
   }
 }
 

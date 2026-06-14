@@ -112,7 +112,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260614-1715";
+const ASSET_VERSION = "20260615-0930";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -179,6 +179,18 @@ function renderDisplayName(nameElement, person, displayName) {
 
   if (hasOverflowAlias(person, displayName)) {
     nameElement.classList.add("name--overflow");
+    displayName.split("").forEach((letter, index) => {
+      const character = document.createElement("span");
+      const intensity = index / Math.max(1, displayName.length - 1);
+
+      character.className = "name-overflow-char";
+      character.textContent = letter;
+      character.style.setProperty("--char-shake", intensity.toFixed(3));
+      character.style.setProperty("--char-delay", `${(-index * 0.027).toFixed(3)}s`);
+      character.style.setProperty("--char-angle", `${(intensity * 2.8).toFixed(3)}deg`);
+      nameElement.append(character);
+    });
+    return;
   }
 
   nameElement.textContent = displayName;

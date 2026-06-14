@@ -1,7 +1,7 @@
 {
   "name": "FlyingV",
   "short_name": "FlyingV",
-  "start_url": "./?v=20260614-1715",
+  "start_url": "./?v=20260615-0930",
   "scope": "./",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
@@ -9,7 +9,7 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "assets/canemagico.png?v=20260614-1715",
+      "src": "assets/canemagico.png?v=20260615-0930",
       "sizes": "1280x1083",
       "type": "image/png",
       "purpose": "any maskable"
