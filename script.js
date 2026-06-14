@@ -116,7 +116,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-1015";
+const ASSET_VERSION = "20260615-1025";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
