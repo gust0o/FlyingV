@@ -4,6 +4,8 @@
 
 :root {
   --type-size: 72px;
+  --dog-body-color: #bd702b;
+  --dog-outline-color: #f0d400;
   --ios-bottom-bleed: max(32px, env(safe-area-inset-bottom));
   --safari-top-bleed: 0px;
   --safari-bottom-bleed: 0px;
@@ -38,6 +40,7 @@ body {
   min-height: 100vh;
   margin: 0 auto;
   padding: clamp(18px, 3vw, 56px);
+  background: #ffffff;
 }
 
 .countdown-list {
@@ -393,10 +396,22 @@ body {
     min-height: calc(100dvh + var(--safari-scroll-offset) + var(--safari-bottom-bleed));
   }
 
+  html,
+  body {
+    background-color: var(--dog-body-color);
+  }
+
   body::after {
     display: block;
     height: var(--safari-bottom-bleed);
     content: "";
+    background:
+      linear-gradient(
+        180deg,
+        #ffffff 0 8px,
+        var(--dog-outline-color) 8px 34px,
+        var(--dog-body-color) 34px 100%
+      );
   }
 
   .page {
