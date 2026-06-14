@@ -129,15 +129,21 @@ body {
   transform-origin: center;
 }
 
-.number--arrived {
-  width: 1.15em;
-  height: 0.82em;
+.number--home {
+  width: 1.18em;
+  height: 0.92em;
 }
 
-.number--arrived::before {
+.number--home::before {
   right: -0.04em;
   bottom: 0.03em;
   left: -0.04em;
+}
+
+.number--unknown-return::before {
+  right: -0.1em;
+  left: -0.1em;
+  transform: rotate(-1deg) scaleX(1.08);
 }
 
 .number--electric {
@@ -183,20 +189,15 @@ body {
   transform: rotate(1.6deg) scaleX(1.14);
 }
 
-.check-mark {
+.home-mark {
   display: block;
-  width: 1.1em;
-  height: 0.82em;
+  width: 1.15em;
+  height: 1em;
   overflow: visible;
 }
 
-.check-mark path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 16;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-  vector-effect: non-scaling-stroke;
+.home-mark path {
+  fill: currentColor;
 }
 
 .number--haunted {

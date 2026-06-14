@@ -65,6 +65,7 @@ const people = [
   },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
+  // If a non-random person leaves with no return date yet, add returnUnknown: true.
 ];
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -112,9 +113,11 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260614-1605";
+const ASSET_VERSION = "20260614-1635";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
+const HOME_NUMBER = "\u221e";
+const UNKNOWN_RETURN_NUMBER = "\u2026";
 
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
@@ -240,7 +243,7 @@ function getMonacoTripNumber(person, now = new Date()) {
   const returnStart = startOfLocalDay(parseLocalDate(returnDate));
 
   if (now < departure) {
-    return "\u221e";
+    return HOME_NUMBER;
   }
 
   if (now < reveal) {
@@ -251,7 +254,7 @@ function getMonacoTripNumber(person, now = new Date()) {
     return formatMissingDays(getDaysUntil(returnDate, now));
   }
 
-  return "\u221e";
+  return HOME_NUMBER;
 }
 
 function isMonacoTripMystery(person, visibleNumber) {
@@ -259,12 +262,16 @@ function isMonacoTripMystery(person, visibleNumber) {
 }
 
 function getNumber(person, now = new Date()) {
+  if (person.returnUnknown) {
+    return UNKNOWN_RETURN_NUMBER;
+  }
+
   if (person.monacoTrip) {
     return getMonacoTripNumber(person, now);
   }
 
   if (person.infinite) {
-    return "\u221e";
+    return HOME_NUMBER;
   }
 
   if (person.randomRange) {
@@ -282,16 +289,15 @@ function getNumber(person, now = new Date()) {
   return formatMissingDays(getDaysUntil(person.arrivalDate));
 }
 
-function createCheckMark() {
+function createHomeMark() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "check-mark");
-  svg.setAttribute("viewBox", "0 0 100 74");
-  svg.setAttribute("aria-label", "arrivato");
+  svg.setAttribute("class", "home-mark");
+  svg.setAttribute("viewBox", "0 0 371.704 324.316");
+  svg.setAttribute("aria-label", "in Calabria");
   svg.setAttribute("role", "img");
 
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", "M10 35 L38 63 L90 9");
-  path.setAttribute("pathLength", "1");
+  path.setAttribute("d", "M145.825 287.988L145.825 206.323C145.825 199.292 150.513 194.824 157.544 194.824L214.307 194.824C221.411 194.824 225.879 199.292 225.879 206.323L225.879 287.988ZM50.3174 287.915C50.3174 310.107 65.1855 324.023 88.6963 324.023L282.861 324.023C306.372 324.023 321.094 310.107 321.094 287.915L321.094 183.398L195.264 77.7832C189.331 72.7295 182.227 72.876 176.367 77.7832L50.3174 183.398ZM19.1895 171.313C24.5361 171.313 29.8096 168.75 34.2773 164.941L177.759 44.6045C180.396 42.4072 183.179 41.2354 185.815 41.2354C188.599 41.2354 191.309 42.4072 193.945 44.6045L337.5 164.941C341.895 168.75 347.168 171.313 352.515 171.313C364.233 171.313 371.704 163.55 371.704 153.223C371.704 147.876 369.067 142.163 364.087 138.062L211.45 9.96094C203.613 3.36914 194.678 0 185.815 0C177.026 0 168.091 3.36914 160.254 9.96094L7.61719 138.062C2.70996 142.163 0 147.876 0 153.223C0 163.55 7.4707 171.313 19.1895 171.313ZM274.585 73.6816L324.17 115.137L324.17 41.6016C324.17 34.7168 319.775 30.3223 312.964 30.3223L285.938 30.3223C279.199 30.3223 274.585 34.7168 274.585 41.6016Z");
   svg.append(path);
 
   return svg;
@@ -493,10 +499,7 @@ function scheduleRandomNumberChange(person, number) {
 }
 
 function updateMonacoTripNumber(person, number) {
-  number.textContent = getNumber(person);
-  number.dataset.value = number.textContent;
-  number.dataset.fitValue = getFitNumber(person, number.textContent);
-  number.classList.toggle("number--mystery", isMonacoTripMystery(person, number.textContent));
+  setNumberDisplay(person, number, getNumber(person));
   scheduleFitTypeSize();
 }
 
@@ -536,6 +539,10 @@ function showMagicDog(displayNames) {
 }
 
 function getFitNumber(person, visibleNumber) {
+  if (isHomeNumber(person, visibleNumber)) {
+    return "HOME";
+  }
+
   if (person.monacoTrip) {
     return "-3";
   }
@@ -549,10 +556,6 @@ function getFitNumber(person, visibleNumber) {
     return "HAUNTED";
   }
 
-  if (hasArrived(person)) {
-    return "V";
-  }
-
   return visibleNumber;
 }
 
@@ -562,7 +565,31 @@ function getMissingDaysRank(visibleNumber) {
 }
 
 function isInCalabria(person, visibleNumber) {
-  return visibleNumber === "\u221e" || hasArrived(person);
+  return isHomeNumber(person, visibleNumber);
+}
+
+function isHomeNumber(person, visibleNumber) {
+  return visibleNumber === HOME_NUMBER || hasArrived(person);
+}
+
+function isUnknownReturnNumber(person, visibleNumber) {
+  return Boolean(person.returnUnknown) && visibleNumber === UNKNOWN_RETURN_NUMBER;
+}
+
+function setNumberDisplay(person, number, visibleNumber) {
+  number.classList.remove("number--home", "number--unknown-return");
+  number.textContent = visibleNumber;
+  number.dataset.value = visibleNumber;
+  number.dataset.fitValue = getFitNumber(person, visibleNumber);
+  number.classList.toggle("number--mystery", isMonacoTripMystery(person, visibleNumber));
+  number.classList.toggle("number--unknown-return", isUnknownReturnNumber(person, visibleNumber));
+
+  if (isHomeNumber(person, visibleNumber)) {
+    number.classList.add("number--home");
+    number.textContent = "";
+    number.dataset.value = HOME_NUMBER;
+    number.append(createHomeMark());
+  }
 }
 
 function getSortedEntries(entries) {
@@ -615,9 +642,9 @@ function measureText(text, includeNumberPadding = false) {
   return width;
 }
 
-function measureCheckMark() {
+function measureHomeMark() {
   const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
-  return typeSize * 1.15;
+  return typeSize * 1.18;
 }
 
 function measureHauntedNumber() {
@@ -631,8 +658,8 @@ function rowsFit() {
     const number = row.querySelector(".number");
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
     let numberWidth = measureText(number.dataset.fitValue, true);
-    if (number.dataset.fitValue === "V") {
-      numberWidth = measureCheckMark();
+    if (number.dataset.fitValue === "HOME") {
+      numberWidth = measureHomeMark();
     }
     if (number.dataset.fitValue === "HAUNTED") {
       numberWidth = measureHauntedNumber();
@@ -753,18 +780,7 @@ function render() {
         number.classList.add("number--haunted");
       }
       number.dataset.name = person.name;
-      number.textContent = initialNumber;
-      number.dataset.value = number.textContent;
-      number.dataset.fitValue = getFitNumber(person, number.textContent);
-      if (isMonacoTripMystery(person, number.textContent)) {
-        number.classList.add("number--mystery");
-      }
-      if (hasArrived(person)) {
-        number.classList.add("number--arrived");
-        number.textContent = "";
-        number.dataset.value = "";
-        number.append(createCheckMark());
-      }
+      setNumberDisplay(person, number, initialNumber);
 
       if (person.randomRange && person.minIntervalMs && person.maxIntervalMs) {
         number.classList.add("number--electric");
