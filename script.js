@@ -48,7 +48,6 @@ const people = [
       "Puttanaaaaaaaaaaaaaaaaaa",
       "John Thernus",
       "DDL ZEN",
-      "Dario fottuto Amodei",
     ],
     randomRange: [1, 99],
     minIntervalMs: 500,
@@ -113,15 +112,17 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260614-1635";
+const ASSET_VERSION = "20260614-1705";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
+const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
 const HOME_NUMBER = "\u221e";
 const UNKNOWN_RETURN_NUMBER = "\u2026";
 
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
 let resizeFrame = 0;
+let coverageFrame = 0;
 const HAUNTED_CANVAS_WIDTH = 360;
 const HAUNTED_CANVAS_HEIGHT = 320;
 const HAUNTED_PARTICLE_COUNT = 1500;
@@ -165,22 +166,22 @@ function getFitName(person, displayName) {
   return hasOverflowAlias(person, displayName) ? OVERFLOW_ALIAS_CORE : displayName;
 }
 
+function shouldWatchNameCoverage(displayName) {
+  return COVERAGE_WATCH_ALIASES.has(displayName);
+}
+
 function renderDisplayName(nameElement, person, displayName) {
-  if (!hasOverflowAlias(person, displayName)) {
-    nameElement.textContent = displayName;
-    return;
+  nameElement.dataset.fullName = displayName;
+
+  if (shouldWatchNameCoverage(displayName)) {
+    nameElement.classList.add("name--coverage-watch");
   }
 
-  const core = document.createElement("span");
-  core.className = "name-overflow-core";
-  core.textContent = OVERFLOW_ALIAS_CORE;
+  if (hasOverflowAlias(person, displayName)) {
+    nameElement.classList.add("name--overflow");
+  }
 
-  const tail = document.createElement("span");
-  tail.className = "name-overflow-tail";
-  tail.textContent = displayName.slice(OVERFLOW_ALIAS_CORE.length);
-
-  nameElement.classList.add("name--overflow");
-  nameElement.append(core, tail);
+  nameElement.textContent = displayName;
 }
 
 function formatMissingDays(days) {
@@ -487,6 +488,7 @@ function triggerRandomNumberChange(person, number) {
       number.classList.remove("number--changed");
     }, 180);
 
+    scheduleNameCoverageUpdate();
     scheduleRandomNumberChange(person, number);
   }, person.shockMs);
 }
@@ -707,11 +709,48 @@ function fitTypeSize() {
   }
 
   root.style.setProperty("--type-size", `${Math.floor(low)}px`);
+  updateNameCoverage();
 }
 
 function scheduleFitTypeSize() {
   window.cancelAnimationFrame(resizeFrame);
   resizeFrame = window.requestAnimationFrame(fitTypeSize);
+}
+
+function updateNameCoverage() {
+  const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
+  const fadeLead = typeSize * 0.45;
+  const fadeTail = typeSize * 0.22;
+
+  list.querySelectorAll(".name--coverage-watch").forEach((name) => {
+    const row = name.closest(".countdown-row");
+    const number = row?.querySelector(".number");
+
+    if (!number) {
+      return;
+    }
+
+    const nameRect = name.getBoundingClientRect();
+    const numberRect = number.getBoundingClientRect();
+    const overlapsNumber = nameRect.right > numberRect.left;
+    name.classList.toggle("name--covered", overlapsNumber);
+
+    if (!overlapsNumber) {
+      name.style.removeProperty("--name-fade-start");
+      name.style.removeProperty("--name-fade-end");
+      return;
+    }
+
+    const fadeStart = Math.max(0, numberRect.left - nameRect.left - fadeLead);
+    const fadeEnd = Math.max(fadeStart + fadeTail, numberRect.left - nameRect.left + fadeTail);
+    name.style.setProperty("--name-fade-start", `${fadeStart}px`);
+    name.style.setProperty("--name-fade-end", `${fadeEnd}px`);
+  });
+}
+
+function scheduleNameCoverageUpdate() {
+  window.cancelAnimationFrame(coverageFrame);
+  coverageFrame = window.requestAnimationFrame(updateNameCoverage);
 }
 
 function preventStaleCache() {

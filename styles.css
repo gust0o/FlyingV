@@ -72,38 +72,32 @@ body {
   white-space: nowrap;
 }
 
-.name--overflow {
+.name--coverage-watch {
   display: inline-block;
   width: max-content;
   overflow: visible;
+}
+
+.name--covered {
+  mask-image: linear-gradient(
+    90deg,
+    #000000 0,
+    #000000 var(--name-fade-start, 100%),
+    rgba(0, 0, 0, 0.62) calc(var(--name-fade-start, 100%) + 0.28em),
+    transparent var(--name-fade-end, 100%)
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000000 0,
+    #000000 var(--name-fade-start, 100%),
+    rgba(0, 0, 0, 0.62) calc(var(--name-fade-start, 100%) + 0.28em),
+    transparent var(--name-fade-end, 100%)
+  );
+}
+
+.name--overflow {
   transform-origin: left 58%;
   animation: shouted-name 0.18s steps(2, end) infinite;
-}
-
-.name-overflow-core {
-  position: relative;
-  z-index: 1;
-}
-
-.name-overflow-tail {
-  position: absolute;
-  top: 0;
-  left: calc(100% - 0.08em);
-  z-index: -1;
-  color: transparent;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.26) 0%,
-    rgba(0, 0, 0, 0.16) 38%,
-    rgba(0, 0, 0, 0.06) 72%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  background-clip: text;
-  filter: blur(0.003em);
-  white-space: nowrap;
-  -webkit-background-clip: text;
-  mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.72) 48%, transparent 100%);
-  pointer-events: none;
 }
 
 .number {
