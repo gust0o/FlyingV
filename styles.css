@@ -102,7 +102,7 @@ body {
 .name-overflow-char {
   display: inline-block;
   transform-origin: 50% 62%;
-  animation: shouted-character 0.34s steps(2, end) infinite;
+  animation: shouted-character 0.22s steps(2, end) infinite;
   animation-delay: var(--char-delay, 0s);
   will-change: transform;
 }
@@ -300,7 +300,7 @@ body {
     transform:
       translate(
         calc(var(--char-shake, 0) * 0.003em),
-        calc(var(--char-shake, 0) * -0.002em)
+        calc(var(--char-shake, 0) * -0.008em)
       )
       rotate(calc(var(--char-angle, 0deg) * 0.12))
       skewX(calc(var(--char-shake, 0) * 0.4deg));
@@ -310,7 +310,7 @@ body {
     transform:
       translate(
         calc(var(--char-shake, 0) * -0.026em),
-        calc(var(--char-shake, 0) * 0.016em)
+        calc(var(--char-shake, 0) * 0.052em)
       )
       rotate(calc(var(--char-angle, 0deg) * -1))
       skewX(calc(var(--char-shake, 0) * -2.8deg));
@@ -320,7 +320,7 @@ body {
     transform:
       translate(
         calc(var(--char-shake, 0) * 0.022em),
-        calc(var(--char-shake, 0) * -0.018em)
+        calc(var(--char-shake, 0) * -0.064em)
       )
       rotate(calc(var(--char-angle, 0deg) * 0.84))
       skewX(calc(var(--char-shake, 0) * 2.2deg));
@@ -330,7 +330,7 @@ body {
     transform:
       translate(
         calc(var(--char-shake, 0) * -0.014em),
-        calc(var(--char-shake, 0) * -0.011em)
+        calc(var(--char-shake, 0) * -0.038em)
       )
       rotate(calc(var(--char-angle, 0deg) * -0.55))
       skewX(calc(var(--char-shake, 0) * -1.7deg));
@@ -340,7 +340,7 @@ body {
     transform:
       translate(
         calc(var(--char-shake, 0) * 0.018em),
-        calc(var(--char-shake, 0) * 0.012em)
+        calc(var(--char-shake, 0) * 0.046em)
       )
       rotate(calc(var(--char-angle, 0deg) * 0.62))
       skewX(calc(var(--char-shake, 0) * 1.9deg));
