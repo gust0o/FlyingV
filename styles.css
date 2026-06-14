@@ -5,12 +5,16 @@
 :root {
   --type-size: 72px;
   --ios-bottom-bleed: max(32px, env(safe-area-inset-bottom));
-  --mobile-chrome-scroll: 220px;
+  --safari-top-bleed: 0px;
+  --safari-bottom-bleed: 0px;
+  --safari-scroll-offset: 0px;
 }
 
 html {
   min-height: 100%;
   overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: none;
   background: #ffffff;
 }
 
@@ -25,6 +29,7 @@ body {
 }
 
 .page {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -374,6 +379,9 @@ body {
 
 @media (max-width: 760px) {
   :root {
+    --safari-top-bleed: 84px;
+    --safari-bottom-bleed: 190px;
+    --safari-scroll-offset: var(--safari-top-bleed);
     --ios-bottom-bleed: max(
       150px,
       env(safe-area-inset-bottom),
@@ -382,21 +390,21 @@ body {
   }
 
   body {
-    min-height: calc(100dvh + var(--mobile-chrome-scroll));
+    min-height: calc(100dvh + var(--safari-scroll-offset) + var(--safari-bottom-bleed));
   }
 
   body::after {
     display: block;
-    height: var(--mobile-chrome-scroll);
+    height: var(--safari-bottom-bleed);
     content: "";
   }
 
   .page {
-    position: fixed;
-    inset: 0;
     justify-content: center;
     min-height: 100dvh;
+    margin-top: var(--safari-scroll-offset);
     padding: 18px 12px 24px;
+    overflow: visible;
   }
 
   .countdown-list {
@@ -418,13 +426,15 @@ body {
   }
 
   .magic-dog {
+    position: absolute;
     right: 50%;
+    bottom: calc(-1 * var(--safari-bottom-bleed));
     width: min(98vw, 500px);
     max-height: none;
     transform: translate(50%, 105%) rotate(-2deg);
   }
 
   .magic-dog--visible {
-    transform: translate(50%, 2%) rotate(-2deg);
+    transform: translate(50%, -18%) rotate(-2deg);
   }
 }

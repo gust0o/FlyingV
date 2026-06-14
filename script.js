@@ -103,7 +103,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260613-1843";
+const ASSET_VERSION = "20260614-1025";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 
@@ -470,7 +470,7 @@ function showMagicDog(displayNames) {
   dog.decoding = "async";
 
   if (!existingDog) {
-    document.body.append(dog);
+    document.querySelector(".page").append(dog);
     dog.getBoundingClientRect();
     dog.classList.add("magic-dog--visible");
   }
@@ -607,8 +607,12 @@ function nudgeMobileBrowserChrome() {
   window.addEventListener("load", () => {
     [80, 350, 900].forEach((delay) => {
       window.setTimeout(() => {
-        if (document.documentElement.scrollHeight > window.innerHeight) {
-          window.scrollTo({ top: 180, left: 0, behavior: "auto" });
+        const offset = Number.parseFloat(
+          getComputedStyle(root).getPropertyValue("--safari-scroll-offset"),
+        ) || 0;
+
+        if (offset > 0 && document.documentElement.scrollHeight > window.innerHeight) {
+          window.scrollTo({ top: offset, left: 0, behavior: "auto" });
         }
       }, delay);
     });
