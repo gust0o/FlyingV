@@ -244,11 +244,11 @@ body {
 
 .haunted-canvas {
   display: block;
-  width: 2.34em;
-  height: 2.06em;
-  margin: -1.08em -0.42em -0.58em -0.34em;
+  width: 2.32em;
+  height: 1.36em;
+  margin: -0.46em -0.34em -0.24em -0.14em;
   opacity: 0.98;
-  filter: blur(0.032em) contrast(1.28) saturate(0.82);
+  filter: blur(0.004em) contrast(1.62) saturate(0.72);
 }
 
 .magic-dog {
