@@ -116,7 +116,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-1025";
+const ASSET_VERSION = "20260615-1115";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -127,9 +127,9 @@ const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
 let resizeFrame = 0;
 let coverageFrame = 0;
-const HAUNTED_CANVAS_WIDTH = 360;
-const HAUNTED_CANVAS_HEIGHT = 320;
-const HAUNTED_PARTICLE_COUNT = 1500;
+const HAUNTED_CANVAS_WIDTH = 500;
+const HAUNTED_CANVAS_HEIGHT = 390;
+const HAUNTED_PARTICLE_COUNT = 820;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -324,6 +324,33 @@ function createHomeMark() {
   return svg;
 }
 
+function getHauntedDigitGhosts(digits) {
+  const baseNumber = Number(digits);
+  const nearbyNumber = Number.isFinite(baseNumber)
+    ? Math.max(1, Math.min(99, baseNumber + getRandomInt(-9, 9)))
+    : getRandomInt(1, 99);
+
+  return [
+    { value: digits, x: 0, y: 0, angle: 0, alpha: 0.72, size: 278 },
+    {
+      value: String(nearbyNumber),
+      x: getRandomInt(-38, 34),
+      y: getRandomInt(-22, 26),
+      angle: getRandomInt(-9, 9) / 100,
+      alpha: 0.56,
+      size: getRandomInt(252, 284),
+    },
+    {
+      value: String(getRandomInt(1, 99)),
+      x: getRandomInt(-54, 42),
+      y: getRandomInt(-30, 34),
+      angle: getRandomInt(-13, 13) / 100,
+      alpha: 0.44,
+      size: getRandomInt(244, 278),
+    },
+  ];
+}
+
 function getDigitTargets(digits) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
@@ -332,10 +359,18 @@ function getDigitTargets(digits) {
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#000000";
-  context.font = "700 258px Helvetica, Arial, sans-serif";
   context.textAlign = "right";
   context.textBaseline = "middle";
-  context.fillText(digits, canvas.width - 20, canvas.height * 0.62);
+
+  getHauntedDigitGhosts(digits).forEach((ghost) => {
+    context.save();
+    context.globalAlpha = ghost.alpha;
+    context.font = `700 ${ghost.size}px Helvetica, Arial, sans-serif`;
+    context.translate(canvas.width - 32 + ghost.x, canvas.height * 0.64 + ghost.y);
+    context.rotate(ghost.angle);
+    context.fillText(ghost.value, 0, 0);
+    context.restore();
+  });
 
   const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
   const targets = [];
@@ -343,7 +378,7 @@ function getDigitTargets(digits) {
   for (let y = 4; y < canvas.height; y += 3) {
     for (let x = 4; x < canvas.width; x += 3) {
       const alpha = pixels[((y * canvas.width + x) * 4) + 3];
-      if (alpha > 42 && Math.random() > 0.1) {
+      if (alpha > 20 && Math.random() > 0.18) {
         targets.push({ x, y, alpha: alpha / 255 });
       }
     }
@@ -354,18 +389,21 @@ function getDigitTargets(digits) {
 
 function createHauntedParticle(target) {
   return {
-    x: target.x + getRandomInt(-34, 34),
-    y: target.y + getRandomInt(-4, 60),
+    x: target.x + getRandomInt(-82, 82),
+    y: target.y + getRandomInt(-22, 92),
     targetX: target.x,
     targetY: target.y,
-    size: getRandomInt(38, 100) / 10,
-    alpha: 0.045 + target.alpha * 0.26,
-    light: Math.random() > 0.985,
-    pull: 0.012 + Math.random() * 0.026,
-    rise: 76 + Math.random() * 150,
-    smokeSpeed: 0.08 + Math.random() * 0.18,
-    wander: 1.4 + Math.random() * 3.2,
+    size: getRandomInt(32, 94) / 10,
+    alpha: 0.022 + target.alpha * 0.14,
+    light: Math.random() > 0.93,
+    pull: 0.005 + Math.random() * 0.018,
+    rise: 190 + Math.random() * 330,
+    smokeSpeed: 0.18 + Math.random() * 0.42,
+    wander: 9 + Math.random() * 34,
+    gust: 28 + Math.random() * 96,
+    trail: getRandomInt(2, 3),
     phase: Math.random() * Math.PI * 2,
+    phase2: Math.random() * Math.PI * 2,
   };
 }
 
@@ -380,78 +418,107 @@ function retargetHauntedParticles(state, digits) {
   state.particles = state.particles.slice(0, targets.length);
   shuffle(targets).forEach((target, index) => {
     const particle = state.particles[index];
-    particle.targetX = target.x + getRandomInt(-4, 4);
-    particle.targetY = target.y + getRandomInt(-4, 4);
-    particle.alpha = 0.045 + target.alpha * 0.26;
-    particle.light = Math.random() > 0.985;
-    particle.rise = 76 + Math.random() * 150;
-    particle.smokeSpeed = 0.08 + Math.random() * 0.18;
+    particle.targetX = target.x + getRandomInt(-22, 22);
+    particle.targetY = target.y + getRandomInt(-20, 20);
+    particle.alpha = 0.022 + target.alpha * 0.14;
+    particle.light = Math.random() > 0.93;
+    particle.rise = 190 + Math.random() * 330;
+    particle.smokeSpeed = 0.18 + Math.random() * 0.42;
+    particle.wander = 9 + Math.random() * 34;
+    particle.gust = 28 + Math.random() * 96;
+    particle.trail = getRandomInt(2, 3);
   });
+
+  state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
 }
 
 function drawHauntedParticles(state) {
   const { canvas, context, particles } = state;
   const now = Date.now() / 1000;
 
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.globalCompositeOperation = "destination-out";
+  context.fillStyle = "rgba(0, 0, 0, 0.115)";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.globalCompositeOperation = "source-over";
 
   particles.filter((particle) => !particle.light).forEach((particle) => {
-    const wobbleX = Math.sin(now * 0.8 + particle.phase) * particle.wander;
-    const wobbleY = Math.cos(now * 0.62 + particle.phase) * particle.wander * 0.22;
+    const wobbleX = Math.sin(now * 1.9 + particle.phase) * particle.wander
+      + Math.sin(now * 5.2 + particle.phase2) * particle.wander * 0.62;
+    const wobbleY = Math.cos(now * 1.4 + particle.phase2) * particle.wander * 0.42
+      + Math.sin(now * 4.4 + particle.phase) * particle.wander * 0.28;
     particle.x += (particle.targetX + wobbleX - particle.x) * particle.pull;
     particle.y += (particle.targetY + wobbleY - particle.y) * particle.pull;
 
     const smoke = (now * particle.smokeSpeed + particle.phase) % 1;
-    const drawX = particle.x + Math.sin(smoke * Math.PI * 2 + particle.phase) * (5 + 28 * smoke);
-    const drawY = particle.y - particle.rise * smoke;
-    const drawAlpha = particle.alpha * (1 - smoke * 0.64);
-    const radius = particle.size * (3.8 + smoke * 2.2);
-    const gradient = context.createRadialGradient(
-      drawX,
-      drawY,
-      0,
-      drawX,
-      drawY,
-      radius,
-    );
+    for (let trailIndex = 0; trailIndex < particle.trail; trailIndex += 1) {
+      if (trailIndex > 0 && smoke < trailIndex * 0.12) {
+        continue;
+      }
+      const trailSmoke = smoke - trailIndex * 0.12;
+      const curl = Math.sin(trailSmoke * Math.PI * 3 + particle.phase) * particle.gust
+        + Math.cos(now * 2.8 + particle.phase2 + trailIndex) * particle.gust * 0.34;
+      const drawX = particle.x + curl * (0.34 + trailSmoke * 0.92)
+        + Math.sin(now * 7.1 + trailSmoke * 9 + particle.phase2) * particle.wander * 0.42;
+      const drawY = particle.y - particle.rise * trailSmoke
+        + Math.cos(now * 5.6 + particle.phase + trailIndex) * particle.wander * 0.5;
+      const drawAlpha = particle.alpha * (1 - trailSmoke * 0.72) * (1 - trailIndex * 0.17);
+      const radius = particle.size * (4.4 + trailSmoke * 7.4 + trailIndex * 1.35);
+      const gradient = context.createRadialGradient(
+        drawX,
+        drawY,
+        0,
+        drawX,
+        drawY,
+        radius,
+      );
 
-    gradient.addColorStop(0, `rgba(0, 0, 0, ${drawAlpha})`);
-    gradient.addColorStop(0.5, `rgba(0, 0, 0, ${drawAlpha * 0.28})`);
-    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      gradient.addColorStop(0, `rgba(0, 0, 0, ${drawAlpha})`);
+      gradient.addColorStop(0.46, `rgba(0, 0, 0, ${drawAlpha * 0.24})`);
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
 
-    context.beginPath();
-    context.fillStyle = gradient;
-    context.arc(drawX, drawY, radius, 0, Math.PI * 2);
-    context.fill();
+      context.beginPath();
+      context.fillStyle = gradient;
+      context.arc(drawX, drawY, radius, 0, Math.PI * 2);
+      context.fill();
+    }
   });
 
   particles.filter((particle) => particle.light).forEach((particle) => {
-    const wobbleX = Math.sin(now * 0.72 + particle.phase) * particle.wander;
-    const wobbleY = Math.cos(now * 0.58 + particle.phase) * particle.wander * 0.2;
+    const wobbleX = Math.sin(now * 1.6 + particle.phase) * particle.wander
+      + Math.cos(now * 4.6 + particle.phase2) * particle.wander * 0.38;
+    const wobbleY = Math.cos(now * 1.2 + particle.phase2) * particle.wander * 0.34;
     particle.x += (particle.targetX + wobbleX - particle.x) * particle.pull;
     particle.y += (particle.targetY + wobbleY - particle.y) * particle.pull;
 
     const smoke = (now * particle.smokeSpeed + particle.phase) % 1;
-    const drawX = particle.x + Math.cos(smoke * Math.PI * 2 + particle.phase) * (4 + 18 * smoke);
-    const drawY = particle.y - particle.rise * smoke;
-    const drawAlpha = particle.alpha * (1 - smoke * 0.72);
-    const radius = particle.size * (2.2 + smoke * 1.2);
-    const gradient = context.createRadialGradient(
-      drawX,
-      drawY,
-      0,
-      drawX,
-      drawY,
-      radius,
-    );
-    gradient.addColorStop(0, `rgba(255, 255, 255, ${drawAlpha * 0.22})`);
-    gradient.addColorStop(0.48, `rgba(255, 255, 255, ${drawAlpha * 0.06})`);
-    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+    for (let trailIndex = 0; trailIndex < 2; trailIndex += 1) {
+      if (trailIndex > 0 && smoke < trailIndex * 0.14) {
+        continue;
+      }
+      const trailSmoke = smoke - trailIndex * 0.14;
+      const drawX = particle.x
+        + Math.cos(trailSmoke * Math.PI * 4 + particle.phase) * (particle.gust * 0.42 + 24 * trailSmoke);
+      const drawY = particle.y - particle.rise * trailSmoke
+        + Math.sin(now * 4.8 + particle.phase2) * particle.wander * 0.38;
+      const drawAlpha = particle.alpha * (1 - trailSmoke * 0.78) * (1 - trailIndex * 0.24);
+      const radius = particle.size * (3.2 + trailSmoke * 4.8 + trailIndex);
+      const gradient = context.createRadialGradient(
+        drawX,
+        drawY,
+        0,
+        drawX,
+        drawY,
+        radius,
+      );
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${drawAlpha * 0.28})`);
+      gradient.addColorStop(0.48, `rgba(255, 255, 255, ${drawAlpha * 0.08})`);
+      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 
-    context.beginPath();
-    context.fillStyle = gradient;
-    context.arc(drawX, drawY, radius, 0, Math.PI * 2);
-    context.fill();
+      context.beginPath();
+      context.fillStyle = gradient;
+      context.arc(drawX, drawY, radius, 0, Math.PI * 2);
+      context.fill();
+    }
   });
 
   state.frame = window.requestAnimationFrame(() => drawHauntedParticles(state));
@@ -671,7 +738,7 @@ function measureHomeMark() {
 
 function measureHauntedNumber() {
   const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
-  return typeSize * 2.05;
+  return typeSize * 2.26;
 }
 
 function rowsFit() {
