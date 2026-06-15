@@ -116,7 +116,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-1505";
+const ASSET_VERSION = "20260615-1535";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -193,12 +193,17 @@ function renderDisplayName(nameElement, person, displayName) {
     displayName.split("").forEach((letter, index) => {
       const character = document.createElement("span");
       const intensity = index / Math.max(1, displayName.length - 1);
+      const jitter = ((index * 37) % 17) / 16;
+      const speed = 0.088 + jitter * 0.07 + (1 - intensity) * 0.026;
+      const lift = 0.18 + intensity * 2.35 + jitter * 0.42;
 
       character.className = "name-overflow-char";
       character.textContent = letter;
       character.style.setProperty("--char-shake", intensity.toFixed(3));
-      character.style.setProperty("--char-delay", `${(-index * 0.027).toFixed(3)}s`);
-      character.style.setProperty("--char-angle", `${(intensity * 2.8).toFixed(3)}deg`);
+      character.style.setProperty("--char-delay", `${(-index * 0.019 - jitter * 0.11).toFixed(3)}s`);
+      character.style.setProperty("--char-angle", `${(intensity * 4.6 + jitter * 0.8).toFixed(3)}deg`);
+      character.style.setProperty("--char-speed", `${speed.toFixed(3)}s`);
+      character.style.setProperty("--char-lift", lift.toFixed(3));
       nameElement.append(character);
     });
     return;
