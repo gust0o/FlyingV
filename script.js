@@ -64,7 +64,7 @@ const people = [
     aliases: ["Federico", "Piaz", "Topo", "Topastro", "Muride", "Rattolino"],
     hauntedDate: "2026-08-15",
     hauntedVarianceDays: 6,
-    hauntedIntervalMs: 5200,
+    hauntedIntervalMs: 7800,
   },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
@@ -116,7 +116,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-1410";
+const ASSET_VERSION = "20260615-1435";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -129,7 +129,8 @@ let resizeFrame = 0;
 let coverageFrame = 0;
 const HAUNTED_CANVAS_WIDTH = 420;
 const HAUNTED_CANVAS_HEIGHT = 260;
-const HAUNTED_PARTICLE_COUNT = 1600;
+const HAUNTED_PARTICLE_COUNT = 1080;
+const HAUNTED_FADE_MS = 5000;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -331,38 +332,31 @@ function getHauntedDigitGhosts(digits) {
     : getRandomInt(1, 99);
 
   return [
-    { value: digits, x: 0, y: 0, angle: 0, alpha: 0.7, size: 218 },
+    { value: digits, x: 0, y: 0, angle: 0, alpha: 0.62, size: 222, keep: 0.42 },
     {
       value: String(nearbyNumber),
-      x: getRandomInt(-26, 26),
-      y: getRandomInt(-16, 18),
-      angle: getRandomInt(-10, 10) / 100,
+      x: getRandomInt(-28, 30),
+      y: getRandomInt(-18, 20),
+      angle: getRandomInt(-14, 14) / 100,
       alpha: 0.48,
-      size: getRandomInt(204, 226),
-    },
-    {
-      value: String(getRandomInt(1, 99)),
-      x: getRandomInt(-36, 34),
-      y: getRandomInt(-22, 22),
-      angle: getRandomInt(-15, 15) / 100,
-      alpha: 0.36,
       size: getRandomInt(196, 220),
+      keep: 0.34,
     },
   ];
 }
 
 function getDigitTargets(digits) {
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  const targets = [];
   canvas.width = HAUNTED_CANVAS_WIDTH;
   canvas.height = HAUNTED_CANVAS_HEIGHT;
 
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = "#000000";
-  context.textAlign = "right";
-  context.textBaseline = "middle";
-
   getHauntedDigitGhosts(digits).forEach((ghost) => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#000000";
+    context.textAlign = "right";
+    context.textBaseline = "middle";
     context.save();
     context.globalAlpha = ghost.alpha;
     context.font = `700 ${ghost.size}px Helvetica, Arial, sans-serif`;
@@ -370,21 +364,20 @@ function getDigitTargets(digits) {
     context.rotate(ghost.angle);
     context.fillText(ghost.value, 0, 0);
     context.restore();
-  });
 
-  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-  const targets = [];
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
 
-  for (let y = 3; y < canvas.height; y += 2) {
-    for (let x = 3; x < canvas.width; x += 2) {
-      const alpha = pixels[((y * canvas.width + x) * 4) + 3];
-      if (alpha > 22 && Math.random() > 0.34) {
-        targets.push({ x, y, alpha: alpha / 255 });
+    for (let y = 3; y < canvas.height; y += 3) {
+      for (let x = 3; x < canvas.width; x += 3) {
+        const alpha = pixels[((y * canvas.width + x) * 4) + 3];
+        if (alpha > 22 && Math.random() < ghost.keep) {
+          targets.push({ x, y, alpha: alpha / 255 });
+        }
       }
     }
-  }
+  });
 
-  for (let index = 0; index < 160; index += 1) {
+  for (let index = 0; index < 210; index += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 34 + Math.random() * 112;
 
@@ -412,10 +405,11 @@ function createHauntedParticle(target) {
     loose: Boolean(target.loose),
     orbit: (target.loose ? 30 : 1) + Math.random() * (target.loose ? 90 : 9),
     grain: 1 + depth * 2.35,
-    spin: (Math.random() > 0.5 ? 1 : -1) * (0.42 + Math.random() * 1.14),
-    stream: 0.45 + Math.random() * 1.1,
-    turbulence: (target.loose ? 10 : 1) + Math.random() * (target.loose ? 28 : 5),
-    twist: (target.loose ? 0.14 : 0.04) + Math.random() * (target.loose ? 0.44 : 0.16),
+    spin: (Math.random() > 0.5 ? 1 : -1) * (0.58 + Math.random() * 1.52),
+    stream: 0.58 + Math.random() * 1.34,
+    turbulence: (target.loose ? 18 : 4) + Math.random() * (target.loose ? 42 : 18),
+    twist: (target.loose ? 0.18 : 0.08) + Math.random() * (target.loose ? 0.6 : 0.26),
+    wind: (target.loose ? 22 : 10) + Math.random() * (target.loose ? 54 : 28),
     phase: Math.random() * Math.PI * 2,
     phase2: Math.random() * Math.PI * 2,
   };
@@ -423,26 +417,19 @@ function createHauntedParticle(target) {
 
 function retargetHauntedParticles(state, digits) {
   const targets = getDigitTargets(digits);
-  state.digits = digits;
+  const now = performance.now();
 
-  while (state.particles.length < targets.length) {
-    state.particles.push(createHauntedParticle(targets[state.particles.length]));
+  if (state.particles.length) {
+    state.fadingLayers.push({
+      particles: state.particles,
+      startedAt: now,
+    });
   }
 
-  state.particles = state.particles.slice(0, targets.length);
-  shuffle(targets).forEach((target, index) => {
-    const particle = state.particles[index];
-    particle.targetX = target.x + getRandomInt(-5, 5);
-    particle.targetY = target.y + getRandomInt(-5, 5);
-    particle.alpha = 0.18 + target.alpha * (target.loose ? 0.32 : 0.82);
-    particle.loose = Boolean(target.loose);
-    particle.orbit = (target.loose ? 30 : 1) + Math.random() * (target.loose ? 90 : 9);
-    particle.grain = 1 + particle.depth * 2.35;
-    particle.spin = (Math.random() > 0.5 ? 1 : -1) * (0.42 + Math.random() * 1.14);
-    particle.stream = 0.45 + Math.random() * 1.1;
-    particle.turbulence = (target.loose ? 10 : 1) + Math.random() * (target.loose ? 28 : 5);
-    particle.twist = (target.loose ? 0.14 : 0.04) + Math.random() * (target.loose ? 0.44 : 0.16);
-  });
+  state.digits = digits;
+  state.fadeStartedAt = now;
+  state.particles = shuffle(targets).map(createHauntedParticle);
+  state.fadingLayers = state.fadingLayers.filter((layer) => now - layer.startedAt < HAUNTED_FADE_MS);
 
   state.context.clearRect(0, 0, state.canvas.width, state.canvas.height);
 }
@@ -464,14 +451,18 @@ function getHauntedParticlePosition(particle, now, trailOffset = 0) {
   const orbit = particle.orbit * pulse;
   const stream = ((time * particle.stream + particle.phase2) % 1 + 1) % 1;
   const lift = particle.loose ? 34 : 18;
+  const wind = particle.wind * (stream - 0.2)
+    + Math.sin(time * 2.9 + particle.phase) * particle.wind * 0.34
+    + Math.cos(time * 1.3 + particle.phase2) * particle.wind * 0.22;
 
   return {
     x: centerX + rotatedX
       + Math.cos(vortex + stream * Math.PI * 2) * orbit
-      + Math.sin(time * 6.1 + particle.phase2) * particle.turbulence,
+      + Math.sin(time * 6.1 + particle.phase2) * particle.turbulence
+      + wind,
     y: centerY + rotatedY
       + Math.sin(vortex * 1.34 + stream * Math.PI * 2) * orbit * 0.58
-      + Math.cos(time * 4.7 + particle.phase) * particle.turbulence * 0.48
+      + Math.cos(time * 4.7 + particle.phase) * particle.turbulence * 0.68
       - (stream - 0.5) * lift,
     stream,
   };
@@ -482,14 +473,7 @@ function drawHauntedGrain(context, x, y, size, alpha) {
   context.fillRect(x, y, size, size);
 }
 
-function drawHauntedParticles(state) {
-  const { canvas, context, particles } = state;
-  const now = Date.now() / 1000;
-
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.globalCompositeOperation = "source-over";
-  context.fillStyle = "#000000";
-
+function drawHauntedLayer(context, particles, now, opacity) {
   particles.forEach((particle) => {
     if (!particle.loose) {
       drawHauntedGrain(
@@ -497,19 +481,45 @@ function drawHauntedParticles(state) {
         particle.targetX,
         particle.targetY,
         particle.grain * 0.72,
-        particle.alpha * 0.32,
+        particle.alpha * 0.32 * opacity,
       );
     }
 
     const trailCount = particle.loose ? 3 : 2;
     for (let trailIndex = trailCount - 1; trailIndex >= 0; trailIndex -= 1) {
       const point = getHauntedParticlePosition(particle, now, trailIndex * 0.045);
-      const trailAlpha = particle.alpha * (1 - trailIndex * 0.22) * (particle.loose ? 0.62 : 1);
+      const trailAlpha = particle.alpha * opacity * (1 - trailIndex * 0.22) * (particle.loose ? 0.62 : 1);
       const grainSize = particle.grain * (1 + trailIndex * 0.08) * (particle.loose ? 0.86 : 1);
 
       drawHauntedGrain(context, point.x, point.y, grainSize, trailAlpha);
     }
   });
+}
+
+function drawHauntedParticles(state) {
+  const { canvas, context, particles } = state;
+  const now = Date.now() / 1000;
+  const nowMs = performance.now();
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.globalCompositeOperation = "source-over";
+  context.fillStyle = "#000000";
+
+  state.fadingLayers = state.fadingLayers.filter((layer) => {
+    const fadeProgress = (nowMs - layer.startedAt) / HAUNTED_FADE_MS;
+    const opacity = Math.max(0, 1 - fadeProgress);
+
+    if (opacity <= 0) {
+      return false;
+    }
+
+    drawHauntedLayer(context, layer.particles, now, opacity);
+    return true;
+  });
+
+  const fadeInProgress = (nowMs - state.fadeStartedAt) / HAUNTED_FADE_MS;
+  const currentOpacity = Math.max(0.08, Math.min(1, fadeInProgress));
+  drawHauntedLayer(context, particles, now, currentOpacity);
 
   context.globalAlpha = 1;
   context.globalCompositeOperation = "source-over";
@@ -537,6 +547,8 @@ function setHauntedNumber(number, value) {
       canvas,
       context: canvas.getContext("2d"),
       digits: "",
+      fadeStartedAt: performance.now(),
+      fadingLayers: [],
       frame: 0,
       particles: [],
     };
