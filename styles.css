@@ -235,7 +235,7 @@ body {
 
 .haunted-sign {
   display: inline-block;
-  margin-right: -0.06em;
+  margin-right: -0.18em;
   color: #000000;
   filter: none;
   line-height: 0.82;
@@ -246,9 +246,25 @@ body {
   display: block;
   width: 2.32em;
   height: 1.36em;
-  margin: -0.46em -0.34em -0.24em -0.14em;
+  margin: -0.46em -0.52em -0.24em -0.28em;
   opacity: 0.98;
   filter: blur(0.004em) contrast(1.62) saturate(0.72);
+}
+
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 980px) {
+  .page {
+    justify-content: flex-start;
+    min-height: auto;
+    padding: 18px 24px 30px;
+  }
+
+  .countdown-list {
+    gap: 24px;
+  }
+
+  .countdown-row {
+    gap: 20px;
+  }
 }
 
 .magic-dog {

@@ -116,7 +116,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-1435";
+const ASSET_VERSION = "20260615-1505";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -131,6 +131,8 @@ const HAUNTED_CANVAS_WIDTH = 420;
 const HAUNTED_CANVAS_HEIGHT = 260;
 const HAUNTED_PARTICLE_COUNT = 1080;
 const HAUNTED_FADE_MS = 5000;
+const HAUNTED_CENTER_X = HAUNTED_CANVAS_WIDTH * 0.56;
+const HAUNTED_TARGET_RIGHT = HAUNTED_CANVAS_WIDTH - 98;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -360,7 +362,7 @@ function getDigitTargets(digits) {
     context.save();
     context.globalAlpha = ghost.alpha;
     context.font = `700 ${ghost.size}px Helvetica, Arial, sans-serif`;
-    context.translate(canvas.width - 12 + ghost.x, canvas.height * 0.58 + ghost.y);
+    context.translate(HAUNTED_TARGET_RIGHT + ghost.x, canvas.height * 0.58 + ghost.y);
     context.rotate(ghost.angle);
     context.fillText(ghost.value, 0, 0);
     context.restore();
@@ -382,7 +384,7 @@ function getDigitTargets(digits) {
     const radius = 34 + Math.random() * 112;
 
     targets.push({
-      x: canvas.width * 0.72 + Math.cos(angle) * radius,
+      x: HAUNTED_CENTER_X + Math.cos(angle) * radius,
       y: canvas.height * 0.56 + Math.sin(angle) * radius * 0.56,
       alpha: 0.18 + Math.random() * 0.22,
       loose: true,
@@ -436,7 +438,7 @@ function retargetHauntedParticles(state, digits) {
 
 function getHauntedParticlePosition(particle, now, trailOffset = 0) {
   const time = now - trailOffset;
-  const centerX = HAUNTED_CANVAS_WIDTH * 0.72;
+  const centerX = HAUNTED_CENTER_X;
   const centerY = HAUNTED_CANVAS_HEIGHT * 0.56;
   const dx = particle.targetX - centerX;
   const dy = particle.targetY - centerY;
@@ -743,7 +745,7 @@ function measureHomeMark() {
 
 function measureHauntedNumber() {
   const typeSize = parseFloat(getComputedStyle(root).getPropertyValue("--type-size")) || 0;
-  return typeSize * 2.26;
+  return typeSize * 1.82;
 }
 
 function rowsFit() {
@@ -767,6 +769,10 @@ function rowsFit() {
 }
 
 function listFitsViewport() {
+  if (isMobileLandscape()) {
+    return true;
+  }
+
   const page = document.querySelector(".page");
   const pageStyle = getComputedStyle(page);
   const availableHeight = window.innerHeight
@@ -780,13 +786,20 @@ function layoutFits() {
   return rowsFit() && listFitsViewport();
 }
 
+function isMobileLandscape() {
+  return window.matchMedia("(orientation: landscape) and (max-height: 520px) and (max-width: 980px)").matches;
+}
+
 function fitTypeSize() {
   if (!list.children.length) {
     return;
   }
 
-  const maxSize = Math.min(window.innerWidth * 0.16, window.innerHeight * 0.14, 180);
-  let low = 14;
+  const mobileLandscape = isMobileLandscape();
+  const maxSize = mobileLandscape
+    ? Math.min(window.innerWidth * 0.098, window.innerHeight * 0.24, 86)
+    : Math.min(window.innerWidth * 0.16, window.innerHeight * 0.14, 180);
+  let low = mobileLandscape ? Math.min(34, maxSize) : 14;
   let high = maxSize;
 
   for (let step = 0; step < 12; step += 1) {
