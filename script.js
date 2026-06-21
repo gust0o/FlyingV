@@ -119,9 +119,11 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-1408";
+const ASSET_VERSION = "20260621-1417";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
+const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
+const OVERFLOW_ALIAS_WARNING = "Alza il finestrino! Alza il Finestrino!";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
 const HOME_NUMBER = "\u221e";
 const UNKNOWN_RETURN_NUMBER = "\u2026";
@@ -180,6 +182,46 @@ function shouldWatchNameCoverage(displayName) {
   return COVERAGE_WATCH_ALIASES.has(displayName);
 }
 
+function renderOverflowAlias(nameElement, displayName) {
+  nameElement.replaceChildren();
+  nameElement.classList.add("name--overflow");
+  nameElement.dataset.sequenceStage = "shout";
+
+  displayName.split("").forEach((letter, index) => {
+    const character = document.createElement("span");
+    const intensity = index / Math.max(1, displayName.length - 1);
+    const jitter = ((index * 37) % 17) / 16;
+    const speed = 0.088 + jitter * 0.07 + (1 - intensity) * 0.026;
+    const lift = 0.18 + intensity * 2.35 + jitter * 0.42;
+
+    character.className = "name-overflow-char";
+    character.textContent = letter;
+    character.style.setProperty("--char-shake", intensity.toFixed(3));
+    character.style.setProperty("--char-delay", `${(-index * 0.019 - jitter * 0.11).toFixed(3)}s`);
+    character.style.setProperty("--char-angle", `${(intensity * 4.6 + jitter * 0.8).toFixed(3)}deg`);
+    character.style.setProperty("--char-speed", `${speed.toFixed(3)}s`);
+    character.style.setProperty("--char-lift", lift.toFixed(3));
+    nameElement.append(character);
+  });
+
+  scheduleNameCoverageUpdate();
+}
+
+function renderOverflowSequence(nameElement, displayName) {
+  nameElement.dataset.sequenceStage = "intro";
+  nameElement.textContent = OVERFLOW_ALIAS_INTRO;
+
+  window.setTimeout(() => {
+    nameElement.dataset.sequenceStage = "warning";
+    nameElement.textContent = OVERFLOW_ALIAS_WARNING;
+    scheduleNameCoverageUpdate();
+  }, 1000);
+
+  window.setTimeout(() => {
+    renderOverflowAlias(nameElement, displayName);
+  }, 3000);
+}
+
 function renderDisplayName(nameElement, person, displayName) {
   nameElement.dataset.fullName = displayName;
 
@@ -192,23 +234,7 @@ function renderDisplayName(nameElement, person, displayName) {
   }
 
   if (hasOverflowAlias(person, displayName)) {
-    nameElement.classList.add("name--overflow");
-    displayName.split("").forEach((letter, index) => {
-      const character = document.createElement("span");
-      const intensity = index / Math.max(1, displayName.length - 1);
-      const jitter = ((index * 37) % 17) / 16;
-      const speed = 0.088 + jitter * 0.07 + (1 - intensity) * 0.026;
-      const lift = 0.18 + intensity * 2.35 + jitter * 0.42;
-
-      character.className = "name-overflow-char";
-      character.textContent = letter;
-      character.style.setProperty("--char-shake", intensity.toFixed(3));
-      character.style.setProperty("--char-delay", `${(-index * 0.019 - jitter * 0.11).toFixed(3)}s`);
-      character.style.setProperty("--char-angle", `${(intensity * 4.6 + jitter * 0.8).toFixed(3)}deg`);
-      character.style.setProperty("--char-speed", `${speed.toFixed(3)}s`);
-      character.style.setProperty("--char-lift", lift.toFixed(3));
-      nameElement.append(character);
-    });
+    renderOverflowSequence(nameElement, displayName);
     return;
   }
 
