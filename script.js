@@ -29,6 +29,11 @@ const people = [
   {
     name: "Nardo",
     aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko", "Paolo", "Pablo Antonio", "Paolo A."],
+    julyVisit: {
+      arrivalRange: ["2026-07-10", "2026-07-11"],
+      departureDate: "2026-07-13",
+      intervalMs: 7800,
+    },
     arrivalDate: "2026-08-02",
     departureDate: "2026-08-20",
     departureVarianceDays: 3,
@@ -65,6 +70,11 @@ const people = [
   {
     name: "Rattolino",
     aliases: ["Federico", "Piaz", "Topo", "Topastro", "Muride", "Rattolino"],
+    julyVisit: {
+      arrivalRange: ["2026-07-10", "2026-07-11"],
+      departureDate: "2026-07-13",
+      intervalMs: 7800,
+    },
     hauntedDate: "2026-08-15",
     hauntedVarianceDays: 6,
     hauntedIntervalMs: 7800,
@@ -120,7 +130,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-1735";
+const ASSET_VERSION = "20260621-1738";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -136,7 +146,7 @@ let resizeFrame = 0;
 let coverageFrame = 0;
 const HAUNTED_CANVAS_WIDTH = 420;
 const HAUNTED_CANVAS_HEIGHT = 260;
-const HAUNTED_PARTICLE_COUNT = 1080;
+const HAUNTED_PARTICLE_COUNT = 1500;
 const HAUNTED_FADE_MS = 5000;
 const HAUNTED_CENTER_X = HAUNTED_CANVAS_WIDTH * 0.56;
 const HAUNTED_TARGET_RIGHT = HAUNTED_CANVAS_WIDTH - 98;
@@ -284,6 +294,49 @@ function hasHauntedArrival(person) {
   return Boolean(person.hauntedDate || person.hauntedRange);
 }
 
+function hasHauntedSchedule(person) {
+  return Boolean(person.julyVisit || hasHauntedArrival(person));
+}
+
+function hasActiveJulyVisit(person, now = new Date()) {
+  if (!person.julyVisit) {
+    return false;
+  }
+
+  const today = startOfLocalDay(now);
+  const departure = startOfLocalDay(parseLocalDate(person.julyVisit.departureDate));
+  return today < departure;
+}
+
+function getJulyVisitArrivalDate(person) {
+  if (!person.runtimeJulyVisitArrivalDate) {
+    const { arrivalRange } = person.julyVisit;
+    person.runtimeJulyVisitArrivalDate = arrivalRange[getRandomInt(0, arrivalRange.length - 1)];
+  }
+
+  return person.runtimeJulyVisitArrivalDate;
+}
+
+function toggleJulyVisitArrivalDate(person) {
+  const { arrivalRange } = person.julyVisit;
+  const currentIndex = arrivalRange.indexOf(person.runtimeJulyVisitArrivalDate);
+  const nextIndex = currentIndex < 0
+    ? getRandomInt(0, arrivalRange.length - 1)
+    : (currentIndex + 1) % arrivalRange.length;
+  person.runtimeJulyVisitArrivalDate = arrivalRange[nextIndex];
+  return person.runtimeJulyVisitArrivalDate;
+}
+
+function getJulyVisitNumber(person, now = new Date()) {
+  const arrivalDate = getJulyVisitArrivalDate(person);
+
+  if (getDaysUntil(arrivalDate, now) > 0) {
+    return formatMissingDays(getDaysUntil(arrivalDate, now));
+  }
+
+  return HOME_NUMBER;
+}
+
 function getHauntedArrivalDate(person) {
   if (!person.runtimeArrivalDate) {
     let date;
@@ -411,6 +464,10 @@ function getNumber(person, now = new Date()) {
     return getMonacoTripNumber(person, now);
   }
 
+  if (hasActiveJulyVisit(person, now)) {
+    return getJulyVisitNumber(person, now);
+  }
+
   if (person.departureDate) {
     return getTemporaryStayNumber(person, now);
   }
@@ -529,7 +586,7 @@ function getDigitTargets(digits) {
     }
   });
 
-  for (let index = 0; index < 210; index += 1) {
+  for (let index = 0; index < 300; index += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 34 + Math.random() * 112;
 
@@ -552,7 +609,7 @@ function createHauntedParticle(target) {
     y: target.y,
     targetX: target.x,
     targetY: target.y,
-    alpha: 0.18 + target.alpha * (target.loose ? 0.32 : 0.82),
+    alpha: 0.22 + target.alpha * (target.loose ? 0.36 : 0.88),
     depth,
     loose: Boolean(target.loose),
     orbit: (target.loose ? 30 : 1) + Math.random() * (target.loose ? 90 : 9),
@@ -744,6 +801,21 @@ function setHauntedDisplay(person, number, visibleNumber) {
   setHauntedNumber(number, visibleNumber);
 }
 
+function shouldUseHauntedDisplay(person, visibleNumber, now = new Date()) {
+  return /^-[0-9]+$/.test(visibleNumber)
+    && (hasActiveJulyVisit(person, now) || hasHauntedArrival(person));
+}
+
+function setDynamicNumberDisplay(person, number, visibleNumber, now = new Date()) {
+  if (shouldUseHauntedDisplay(person, visibleNumber, now)) {
+    setHauntedDisplay(person, number, visibleNumber);
+    return;
+  }
+
+  stopHauntedNumber(number);
+  setNumberDisplay(person, number, visibleNumber);
+}
+
 function triggerRandomNumberChange(person, number) {
   number.classList.add("number--shocking");
 
@@ -826,7 +898,7 @@ function getFitNumber(person, visibleNumber) {
     return formatMissingDays(maxMagnitude);
   }
 
-  if (hasHauntedArrival(person) && /^-[0-9]+$/.test(visibleNumber)) {
+  if (shouldUseHauntedDisplay(person, visibleNumber)) {
     return "HAUNTED";
   }
 
@@ -1087,7 +1159,7 @@ function render() {
     ...getSortedEntries(entries).map(({ person, displayName, initialNumber }) => {
       const row = document.createElement("article");
       row.className = "countdown-row";
-      if (hasHauntedArrival(person)) {
+      if (hasHauntedSchedule(person)) {
         row.classList.add("countdown-row--haunted");
       }
 
@@ -1099,8 +1171,8 @@ function render() {
       const number = document.createElement("p");
       number.className = "number";
       number.dataset.name = person.name;
-      if (hasHauntedArrival(person)) {
-        setHauntedDisplay(person, number, initialNumber);
+      if (hasHauntedSchedule(person)) {
+        setDynamicNumberDisplay(person, number, initialNumber);
       } else {
         setNumberDisplay(person, number, initialNumber);
       }
@@ -1114,12 +1186,21 @@ function render() {
         scheduleMonacoTripRefresh(person, number);
       }
 
-      if (hasHauntedArrival(person)) {
-        if (person.hauntedIntervalMs) {
+      if (hasHauntedSchedule(person)) {
+        const hauntedIntervalMs = person.julyVisit?.intervalMs || person.hauntedIntervalMs;
+
+        if (hauntedIntervalMs) {
           window.setInterval(() => {
-            resetHauntedArrivalDate(person);
-            setHauntedDisplay(person, number, getNumber(person));
-          }, person.hauntedIntervalMs);
+            const now = new Date();
+
+            if (hasActiveJulyVisit(person, now)) {
+              toggleJulyVisitArrivalDate(person);
+            } else if (hasHauntedArrival(person)) {
+              resetHauntedArrivalDate(person);
+            }
+
+            setDynamicNumberDisplay(person, number, getNumber(person, now), now);
+          }, hauntedIntervalMs);
         }
       }
 
