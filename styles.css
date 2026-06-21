@@ -206,6 +206,12 @@ body {
   fill: currentColor;
 }
 
+.home-mark--pc {
+  width: 1.02em;
+  height: 1.02em;
+  object-fit: contain;
+}
+
 .number--haunted {
   isolation: isolate;
   display: inline-flex;

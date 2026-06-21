@@ -118,7 +118,8 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260621-1354";
+const PC_HOME_CHANCE = 30;
+const ASSET_VERSION = "20260621-1408";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -345,7 +346,32 @@ function getNumber(person, now = new Date()) {
   return formatMissingDays(getDaysUntil(person.arrivalDate));
 }
 
-function createHomeMark() {
+function shouldShowPcHome(person) {
+  if (person.name !== "Esse") {
+    return false;
+  }
+
+  if (typeof person.runtimeShowPcHome !== "boolean") {
+    person.runtimeShowPcHome = getRandomInt(1, PC_HOME_CHANCE) === PC_HOME_CHANCE;
+  }
+
+  return person.runtimeShowPcHome;
+}
+
+function createPcHomeMark() {
+  const image = document.createElement("img");
+  image.className = "home-mark home-mark--pc";
+  image.src = `assets/pc.svg?v=${ASSET_VERSION}`;
+  image.alt = "al computer";
+  image.decoding = "async";
+  return image;
+}
+
+function createHomeMark(person) {
+  if (shouldShowPcHome(person)) {
+    return createPcHomeMark();
+  }
+
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("class", "home-mark");
   svg.setAttribute("viewBox", "0 0 371.704 324.316");
@@ -716,7 +742,7 @@ function setNumberDisplay(person, number, visibleNumber) {
     number.classList.add("number--home");
     number.textContent = "";
     number.dataset.value = HOME_NUMBER;
-    number.append(createHomeMark());
+    number.append(createHomeMark(person));
   }
 }
 
