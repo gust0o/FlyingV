@@ -130,7 +130,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-1738";
+const ASSET_VERSION = "20260621-2031";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -146,7 +146,7 @@ let resizeFrame = 0;
 let coverageFrame = 0;
 const HAUNTED_CANVAS_WIDTH = 420;
 const HAUNTED_CANVAS_HEIGHT = 260;
-const HAUNTED_PARTICLE_COUNT = 1500;
+const HAUNTED_PARTICLE_COUNT = 2200;
 const HAUNTED_FADE_MS = 5000;
 const HAUNTED_CENTER_X = HAUNTED_CANVAS_WIDTH * 0.56;
 const HAUNTED_TARGET_RIGHT = HAUNTED_CANVAS_WIDTH - 98;
@@ -541,7 +541,7 @@ function getHauntedDigitGhosts(digits) {
     : getRandomInt(1, 99);
 
   return [
-    { value: digits, x: 0, y: 0, angle: 0, alpha: 0.62, size: 222, keep: 0.42 },
+    { value: digits, x: 0, y: 0, angle: 0, alpha: 0.62, size: 222, keep: 0.5 },
     {
       value: String(nearbyNumber),
       x: getRandomInt(-28, 30),
@@ -549,7 +549,7 @@ function getHauntedDigitGhosts(digits) {
       angle: getRandomInt(-14, 14) / 100,
       alpha: 0.48,
       size: getRandomInt(196, 220),
-      keep: 0.34,
+      keep: 0.42,
     },
   ];
 }
@@ -576,8 +576,8 @@ function getDigitTargets(digits) {
 
     const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
 
-    for (let y = 3; y < canvas.height; y += 3) {
-      for (let x = 3; x < canvas.width; x += 3) {
+    for (let y = 2; y < canvas.height; y += 2) {
+      for (let x = 2; x < canvas.width; x += 2) {
         const alpha = pixels[((y * canvas.width + x) * 4) + 3];
         if (alpha > 22 && Math.random() < ghost.keep) {
           targets.push({ x, y, alpha: alpha / 255 });
@@ -586,7 +586,7 @@ function getDigitTargets(digits) {
     }
   });
 
-  for (let index = 0; index < 300; index += 1) {
+  for (let index = 0; index < 420; index += 1) {
     const angle = Math.random() * Math.PI * 2;
     const radius = 34 + Math.random() * 112;
 

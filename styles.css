@@ -253,8 +253,8 @@ body {
   width: 2.32em;
   height: 1.36em;
   margin: -0.46em -0.52em -0.24em -0.28em;
-  opacity: 0.98;
-  filter: blur(0.004em) contrast(1.62) saturate(0.72);
+  opacity: 1;
+  filter: contrast(1.72) saturate(0.72);
 }
 
 @media (orientation: landscape) and (max-height: 520px) and (max-width: 980px) {
