@@ -29,7 +29,9 @@ const people = [
   {
     name: "Nardo",
     aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko", "Paolo", "Pablo Antonio", "Paolo A."],
-    arrivalDate: "2026-06-18",
+    arrivalDate: "2026-08-02",
+    departureDate: "2026-08-20",
+    departureVarianceDays: 3,
   },
   {
     name: "Rocco",
@@ -116,7 +118,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
   Rocco: "Dejavio",
 };
 const MAGIC_DOG_CHANCE = 40;
-const ASSET_VERSION = "20260615-1535";
+const ASSET_VERSION = "20260621-1354";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
@@ -290,6 +292,27 @@ function isMonacoTripMystery(person, visibleNumber) {
   return Boolean(person.monacoTrip) && visibleNumber === "?";
 }
 
+function getDepartureDate(person) {
+  if (!person.runtimeDepartureDate) {
+    const date = parseLocalDate(person.departureDate);
+    const variance = person.departureVarianceDays || 0;
+    date.setDate(date.getDate() + getRandomInt(-variance, variance));
+    person.runtimeDepartureDate = formatLocalDate(date);
+  }
+
+  return person.runtimeDepartureDate;
+}
+
+function getTemporaryStayNumber(person, now = new Date()) {
+  if (getDaysUntil(person.arrivalDate, now) > 0) {
+    return formatMissingDays(getDaysUntil(person.arrivalDate, now));
+  }
+
+  const today = startOfLocalDay(now);
+  const departure = startOfLocalDay(parseLocalDate(getDepartureDate(person)));
+  return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
+}
+
 function getNumber(person, now = new Date()) {
   if (person.returnUnknown) {
     return UNKNOWN_RETURN_NUMBER;
@@ -297,6 +320,10 @@ function getNumber(person, now = new Date()) {
 
   if (person.monacoTrip) {
     return getMonacoTripNumber(person, now);
+  }
+
+  if (person.departureDate) {
+    return getTemporaryStayNumber(person, now);
   }
 
   if (person.infinite) {
@@ -312,7 +339,7 @@ function getNumber(person, now = new Date()) {
   }
 
   if (person.hauntedDate) {
-    return formatMissingDays(getDaysUntil(getHauntedArrivalDate(person)));
+    return formatMissingDays(getDaysUntil(getHauntedArrivalDate(person), now));
   }
 
   return formatMissingDays(getDaysUntil(person.arrivalDate));
@@ -670,11 +697,11 @@ function isInCalabria(person, visibleNumber) {
 }
 
 function isHomeNumber(person, visibleNumber) {
-  return visibleNumber === HOME_NUMBER || hasArrived(person);
+  return visibleNumber === HOME_NUMBER || (visibleNumber === "-0" && hasArrived(person));
 }
 
 function isUnknownReturnNumber(person, visibleNumber) {
-  return Boolean(person.returnUnknown) && visibleNumber === UNKNOWN_RETURN_NUMBER;
+  return visibleNumber === UNKNOWN_RETURN_NUMBER;
 }
 
 function setNumberDisplay(person, number, visibleNumber) {
