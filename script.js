@@ -55,10 +55,9 @@ const people = [
       "John Thernus",
       "DDL ZEN",
     ],
-    randomRange: [1, 99],
-    minIntervalMs: 500,
-    maxIntervalMs: 3000,
-    shockMs: 260,
+    hauntedRange: ["2026-07-03", "2026-07-04"],
+    hauntedIntervalMs: 7800,
+    stayDays: 10,
   },
   { name: "Jarbo", aliases: ["Jarbo", "Jarbolone", "Gobu", "Giambadabro"], randomSymbol: true },
   {
@@ -119,7 +118,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-1417";
+const ASSET_VERSION = "20260621-1623";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -278,11 +277,26 @@ function hasArrived(person) {
   return Boolean(person.arrivalDate) && getDaysUntil(person.arrivalDate) === 0;
 }
 
+function hasHauntedArrival(person) {
+  return Boolean(person.hauntedDate || person.hauntedRange);
+}
+
 function getHauntedArrivalDate(person) {
   if (!person.runtimeArrivalDate) {
-    const date = parseLocalDate(person.hauntedDate);
-    const offset = getRandomInt(-person.hauntedVarianceDays, person.hauntedVarianceDays);
-    date.setDate(date.getDate() + offset);
+    let date;
+
+    if (person.hauntedRange) {
+      const start = parseLocalDate(person.hauntedRange[0]);
+      const end = parseLocalDate(person.hauntedRange[1]);
+      const rangeDays = Math.round((end - start) / MS_PER_DAY);
+      date = new Date(start);
+      date.setDate(date.getDate() + getRandomInt(0, rangeDays));
+    } else {
+      date = parseLocalDate(person.hauntedDate);
+      const offset = getRandomInt(-person.hauntedVarianceDays, person.hauntedVarianceDays);
+      date.setDate(date.getDate() + offset);
+    }
+
     person.runtimeArrivalDate = formatLocalDate(date);
   }
 
@@ -340,6 +354,20 @@ function getTemporaryStayNumber(person, now = new Date()) {
   return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
 }
 
+function getHauntedNumber(person, now = new Date()) {
+  const arrivalDate = getHauntedArrivalDate(person);
+  const arrival = startOfLocalDay(parseLocalDate(arrivalDate));
+  const today = startOfLocalDay(now);
+
+  if (!person.stayDays || today < arrival) {
+    return formatMissingDays(getDaysUntil(arrivalDate, now));
+  }
+
+  const departure = new Date(arrival);
+  departure.setDate(departure.getDate() + person.stayDays);
+  return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
+}
+
 function getNumber(person, now = new Date()) {
   if (person.returnUnknown) {
     return UNKNOWN_RETURN_NUMBER;
@@ -365,8 +393,8 @@ function getNumber(person, now = new Date()) {
     return STRANGE_SYMBOLS[getRandomInt(0, STRANGE_SYMBOLS.length - 1)];
   }
 
-  if (person.hauntedDate) {
-    return formatMissingDays(getDaysUntil(getHauntedArrivalDate(person), now));
+  if (hasHauntedArrival(person)) {
+    return getHauntedNumber(person, now);
   }
 
   return formatMissingDays(getDaysUntil(person.arrivalDate));
@@ -653,6 +681,31 @@ function setHauntedNumber(number, value) {
   }
 }
 
+function stopHauntedNumber(number) {
+  if (number.hauntedState?.frame) {
+    window.cancelAnimationFrame(number.hauntedState.frame);
+  }
+
+  number.hauntedState = null;
+  number.classList.remove("number--haunted");
+}
+
+function setHauntedDisplay(person, number, visibleNumber) {
+  const shouldHaunt = /^-[0-9]+$/.test(visibleNumber);
+
+  if (!shouldHaunt) {
+    stopHauntedNumber(number);
+    setNumberDisplay(person, number, visibleNumber);
+    return;
+  }
+
+  number.classList.remove("number--home", "number--unknown-return", "number--mystery");
+  number.classList.add("number--haunted");
+  number.dataset.value = visibleNumber;
+  number.dataset.fitValue = "HAUNTED";
+  setHauntedNumber(number, visibleNumber);
+}
+
 function triggerRandomNumberChange(person, number) {
   number.classList.add("number--shocking");
 
@@ -732,7 +785,7 @@ function getFitNumber(person, visibleNumber) {
     return formatMissingDays(maxMagnitude);
   }
 
-  if (person.hauntedDate) {
+  if (hasHauntedArrival(person) && /^-[0-9]+$/.test(visibleNumber)) {
     return "HAUNTED";
   }
 
@@ -993,7 +1046,7 @@ function render() {
     ...getSortedEntries(entries).map(({ person, displayName, initialNumber }) => {
       const row = document.createElement("article");
       row.className = "countdown-row";
-      if (person.hauntedDate) {
+      if (hasHauntedArrival(person)) {
         row.classList.add("countdown-row--haunted");
       }
 
@@ -1004,11 +1057,12 @@ function render() {
 
       const number = document.createElement("p");
       number.className = "number";
-      if (person.hauntedDate) {
-        number.classList.add("number--haunted");
-      }
       number.dataset.name = person.name;
-      setNumberDisplay(person, number, initialNumber);
+      if (hasHauntedArrival(person)) {
+        setHauntedDisplay(person, number, initialNumber);
+      } else {
+        setNumberDisplay(person, number, initialNumber);
+      }
 
       if (person.randomRange && person.minIntervalMs && person.maxIntervalMs) {
         number.classList.add("number--electric");
@@ -1019,13 +1073,11 @@ function render() {
         scheduleMonacoTripRefresh(person, number);
       }
 
-      if (person.hauntedDate) {
-        setHauntedNumber(number, number.dataset.value);
-
+      if (hasHauntedArrival(person)) {
         if (person.hauntedIntervalMs) {
           window.setInterval(() => {
             resetHauntedArrivalDate(person);
-            setHauntedNumber(number, getNumber(person));
+            setHauntedDisplay(person, number, getNumber(person));
           }, person.hauntedIntervalMs);
         }
       }
