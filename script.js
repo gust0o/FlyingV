@@ -55,9 +55,11 @@ const people = [
       "John Thernus",
       "DDL ZEN",
     ],
-    hauntedRange: ["2026-07-03", "2026-07-04"],
-    hauntedIntervalMs: 7800,
+    arrivalRange: ["2026-07-03", "2026-07-04"],
     stayDays: 10,
+    minIntervalMs: 500,
+    maxIntervalMs: 3000,
+    shockMs: 260,
   },
   { name: "Jarbo", aliases: ["Jarbo", "Jarbolone", "Gobu", "Giambadabro"], randomSymbol: true },
   {
@@ -118,7 +120,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-1623";
+const ASSET_VERSION = "20260621-1630";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -354,6 +356,37 @@ function getTemporaryStayNumber(person, now = new Date()) {
   return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
 }
 
+function getRangedArrivalDate(person) {
+  if (!person.runtimeArrivalDate) {
+    person.runtimeArrivalDate = person.arrivalRange[getRandomInt(0, person.arrivalRange.length - 1)];
+  }
+
+  return person.runtimeArrivalDate;
+}
+
+function toggleRangedArrivalDate(person) {
+  const currentIndex = person.arrivalRange.indexOf(person.runtimeArrivalDate);
+  const nextIndex = currentIndex < 0
+    ? getRandomInt(0, person.arrivalRange.length - 1)
+    : (currentIndex + 1) % person.arrivalRange.length;
+  person.runtimeArrivalDate = person.arrivalRange[nextIndex];
+  return person.runtimeArrivalDate;
+}
+
+function getRangedArrivalNumber(person, now = new Date()) {
+  const arrivalDate = getRangedArrivalDate(person);
+  const arrival = startOfLocalDay(parseLocalDate(arrivalDate));
+  const today = startOfLocalDay(now);
+
+  if (today < arrival) {
+    return formatMissingDays(getDaysUntil(arrivalDate, now));
+  }
+
+  const departure = new Date(arrival);
+  departure.setDate(departure.getDate() + person.stayDays);
+  return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
+}
+
 function getHauntedNumber(person, now = new Date()) {
   const arrivalDate = getHauntedArrivalDate(person);
   const arrival = startOfLocalDay(parseLocalDate(arrivalDate));
@@ -383,6 +416,10 @@ function getNumber(person, now = new Date()) {
 
   if (person.infinite) {
     return HOME_NUMBER;
+  }
+
+  if (person.arrivalRange) {
+    return getRangedArrivalNumber(person, now);
   }
 
   if (person.randomRange) {
@@ -710,8 +747,11 @@ function triggerRandomNumberChange(person, number) {
   number.classList.add("number--shocking");
 
   window.setTimeout(() => {
-    number.textContent = getNumber(person);
-    number.dataset.value = number.textContent;
+    if (person.arrivalRange) {
+      toggleRangedArrivalDate(person);
+    }
+
+    setNumberDisplay(person, number, getNumber(person));
     number.classList.remove("number--shocking");
     number.classList.add("number--changed");
 
@@ -1064,7 +1104,7 @@ function render() {
         setNumberDisplay(person, number, initialNumber);
       }
 
-      if (person.randomRange && person.minIntervalMs && person.maxIntervalMs) {
+      if ((person.randomRange || person.arrivalRange) && person.minIntervalMs && person.maxIntervalMs) {
         number.classList.add("number--electric");
         scheduleRandomNumberChange(person, number);
       }
