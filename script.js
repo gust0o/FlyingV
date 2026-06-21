@@ -120,7 +120,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-1630";
+const ASSET_VERSION = "20260621-1735";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -128,6 +128,7 @@ const OVERFLOW_ALIAS_WARNING = "Alza il finestrino! Alza il Finestrino!";
 const COVERAGE_WATCH_ALIASES = new Set([OVERFLOW_ALIAS, "Giacoooooo"]);
 const HOME_NUMBER = "\u221e";
 const UNKNOWN_RETURN_NUMBER = "\u2026";
+const TRAVEL_ERROR_NUMBER = "\uFFFD";
 
 const list = document.querySelector("#countdown-list");
 const root = document.documentElement;
@@ -321,7 +322,7 @@ function getMonacoTripNumber(person, now = new Date()) {
   }
 
   if (now < reveal) {
-    return "?";
+    return TRAVEL_ERROR_NUMBER;
   }
 
   if (now < returnStart) {
@@ -332,7 +333,7 @@ function getMonacoTripNumber(person, now = new Date()) {
 }
 
 function isMonacoTripMystery(person, visibleNumber) {
-  return Boolean(person.monacoTrip) && visibleNumber === "?";
+  return Boolean(person.monacoTrip) && visibleNumber === TRAVEL_ERROR_NUMBER;
 }
 
 function getDepartureDate(person) {
