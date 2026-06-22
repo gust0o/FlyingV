@@ -47,7 +47,10 @@ const people = [
       "Enrica Riera",
       "Pellicano",
       "Pellimagico",
+      "Pennutone",
       "Dejavio",
+      "The Charlatain",
+      "Scarnates",
       "Dario Amodei",
       "Agent AI",
       "Botte Donato",
@@ -130,7 +133,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260621-2031";
+const ASSET_VERSION = "20260622-1240";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
