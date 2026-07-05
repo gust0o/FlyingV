@@ -30,8 +30,8 @@ const people = [
     name: "Nardo",
     aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko", "Paolo", "Pablo Antonio", "Paolo A."],
     julyVisit: {
-      arrivalRange: ["2026-07-10", "2026-07-11"],
-      departureDate: "2026-07-13",
+      arrivalRange: ["2026-07-05"],
+      departureRange: ["2026-07-13", "2026-07-14"],
       intervalMs: 7800,
     },
     arrivalDate: "2026-08-02",
@@ -64,7 +64,7 @@ const people = [
       "DDL ZEN",
     ],
     arrivalRange: ["2026-07-03", "2026-07-04"],
-    stayDays: 10,
+    departureRange: ["2026-07-10", "2026-07-11"],
     minIntervalMs: 500,
     maxIntervalMs: 3000,
     shockMs: 260,
@@ -133,7 +133,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260622-1240";
+const ASSET_VERSION = "20260705-2004";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -171,6 +171,10 @@ function shuffle(items) {
 
 function getDisplayName(person) {
   return person.aliases[getRandomInt(0, person.aliases.length - 1)];
+}
+
+function getRandomDateFromRange(range) {
+  return range[getRandomInt(0, range.length - 1)];
 }
 
 function shouldForceMagicDog() {
@@ -307,17 +311,31 @@ function hasActiveJulyVisit(person, now = new Date()) {
   }
 
   const today = startOfLocalDay(now);
-  const departure = startOfLocalDay(parseLocalDate(person.julyVisit.departureDate));
+  const departure = startOfLocalDay(parseLocalDate(getJulyVisitDepartureDate(person)));
   return today < departure;
 }
 
 function getJulyVisitArrivalDate(person) {
   if (!person.runtimeJulyVisitArrivalDate) {
     const { arrivalRange } = person.julyVisit;
-    person.runtimeJulyVisitArrivalDate = arrivalRange[getRandomInt(0, arrivalRange.length - 1)];
+    person.runtimeJulyVisitArrivalDate = getRandomDateFromRange(arrivalRange);
   }
 
   return person.runtimeJulyVisitArrivalDate;
+}
+
+function getJulyVisitDepartureDate(person) {
+  const { departureDate, departureRange } = person.julyVisit;
+
+  if (!departureRange) {
+    return departureDate;
+  }
+
+  if (!person.runtimeJulyVisitDepartureDate) {
+    person.runtimeJulyVisitDepartureDate = getRandomDateFromRange(departureRange);
+  }
+
+  return person.runtimeJulyVisitDepartureDate;
 }
 
 function toggleJulyVisitArrivalDate(person) {
@@ -394,10 +412,14 @@ function isMonacoTripMystery(person, visibleNumber) {
 
 function getDepartureDate(person) {
   if (!person.runtimeDepartureDate) {
-    const date = parseLocalDate(person.departureDate);
-    const variance = person.departureVarianceDays || 0;
-    date.setDate(date.getDate() + getRandomInt(-variance, variance));
-    person.runtimeDepartureDate = formatLocalDate(date);
+    if (person.departureRange) {
+      person.runtimeDepartureDate = getRandomDateFromRange(person.departureRange);
+    } else {
+      const date = parseLocalDate(person.departureDate);
+      const variance = person.departureVarianceDays || 0;
+      date.setDate(date.getDate() + getRandomInt(-variance, variance));
+      person.runtimeDepartureDate = formatLocalDate(date);
+    }
   }
 
   return person.runtimeDepartureDate;
@@ -415,7 +437,7 @@ function getTemporaryStayNumber(person, now = new Date()) {
 
 function getRangedArrivalDate(person) {
   if (!person.runtimeArrivalDate) {
-    person.runtimeArrivalDate = person.arrivalRange[getRandomInt(0, person.arrivalRange.length - 1)];
+    person.runtimeArrivalDate = getRandomDateFromRange(person.arrivalRange);
   }
 
   return person.runtimeArrivalDate;
@@ -439,8 +461,14 @@ function getRangedArrivalNumber(person, now = new Date()) {
     return formatMissingDays(getDaysUntil(arrivalDate, now));
   }
 
-  const departure = new Date(arrival);
-  departure.setDate(departure.getDate() + person.stayDays);
+  const departure = person.departureRange
+    ? startOfLocalDay(parseLocalDate(getDepartureDate(person)))
+    : new Date(arrival);
+
+  if (!person.departureRange) {
+    departure.setDate(departure.getDate() + person.stayDays);
+  }
+
   return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
 }
 
