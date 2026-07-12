@@ -65,6 +65,7 @@ const people = [
     ],
     arrivalRange: ["2026-07-03", "2026-07-04"],
     departureRange: ["2026-07-10", "2026-07-11"],
+    returnArrivalRange: ["2026-07-16", "2026-07-17", "2026-07-18"],
     minIntervalMs: 500,
     maxIntervalMs: 3000,
     shockMs: 260,
@@ -133,7 +134,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260705-2004";
+const ASSET_VERSION = "20260712-1555";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -435,30 +436,56 @@ function getTemporaryStayNumber(person, now = new Date()) {
   return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
 }
 
-function getRangedArrivalDate(person) {
-  if (!person.runtimeArrivalDate) {
-    person.runtimeArrivalDate = getRandomDateFromRange(person.arrivalRange);
+function hasPassedRangedDeparture(person, now = new Date()) {
+  if (!person.departureRange) {
+    return false;
+  }
+
+  const today = startOfLocalDay(now);
+  const departure = startOfLocalDay(parseLocalDate(getDepartureDate(person)));
+  return today >= departure;
+}
+
+function getActiveRangedArrivalRange(person, now = new Date()) {
+  if (person.returnArrivalRange && hasPassedRangedDeparture(person, now)) {
+    return person.returnArrivalRange;
+  }
+
+  return person.arrivalRange;
+}
+
+function getRangedArrivalDate(person, now = new Date()) {
+  const range = getActiveRangedArrivalRange(person, now);
+
+  if (!person.runtimeArrivalDate || !range.includes(person.runtimeArrivalDate)) {
+    person.runtimeArrivalDate = getRandomDateFromRange(range);
   }
 
   return person.runtimeArrivalDate;
 }
 
-function toggleRangedArrivalDate(person) {
-  const currentIndex = person.arrivalRange.indexOf(person.runtimeArrivalDate);
+function toggleRangedArrivalDate(person, now = new Date()) {
+  const range = getActiveRangedArrivalRange(person, now);
+  const currentIndex = range.indexOf(person.runtimeArrivalDate);
   const nextIndex = currentIndex < 0
-    ? getRandomInt(0, person.arrivalRange.length - 1)
-    : (currentIndex + 1) % person.arrivalRange.length;
-  person.runtimeArrivalDate = person.arrivalRange[nextIndex];
+    ? getRandomInt(0, range.length - 1)
+    : (currentIndex + 1) % range.length;
+  person.runtimeArrivalDate = range[nextIndex];
   return person.runtimeArrivalDate;
 }
 
 function getRangedArrivalNumber(person, now = new Date()) {
-  const arrivalDate = getRangedArrivalDate(person);
+  const activeRange = getActiveRangedArrivalRange(person, now);
+  const arrivalDate = getRangedArrivalDate(person, now);
   const arrival = startOfLocalDay(parseLocalDate(arrivalDate));
   const today = startOfLocalDay(now);
 
   if (today < arrival) {
     return formatMissingDays(getDaysUntil(arrivalDate, now));
+  }
+
+  if (activeRange === person.returnArrivalRange) {
+    return HOME_NUMBER;
   }
 
   const departure = person.departureRange
