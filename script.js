@@ -30,11 +30,11 @@ const people = [
     name: "Nardo",
     aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko", "Paolo", "Pablo Antonio", "Paolo A."],
     julyVisit: {
-      arrivalRange: ["2026-07-05"],
-      departureRange: ["2026-07-13", "2026-07-14"],
+      arrivalRange: ["2026-07-14"],
+      departureRange: ["2026-07-15", "2026-07-16"],
       intervalMs: 7800,
     },
-    arrivalDate: "2026-08-02",
+    arrivalDate: "2026-08-01",
     departureDate: "2026-08-20",
     departureVarianceDays: 3,
   },
@@ -134,7 +134,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260712-1555";
+const ASSET_VERSION = "20260712-1603";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
