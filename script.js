@@ -79,10 +79,9 @@ const people = [
       departureDate: "2026-07-14",
       intervalMs: 7800,
     },
-    hauntedDate: "2026-08-15",
-    hauntedVarianceDays: 6,
+    hauntedRange: ["2026-08-08", "2026-08-09"],
     hauntedIntervalMs: 7800,
-    stayDays: 10,
+    stayDays: 11,
   },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
@@ -135,7 +134,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260712-1610";
+const ASSET_VERSION = "20260720-1327";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
