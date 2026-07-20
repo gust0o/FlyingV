@@ -65,7 +65,7 @@ const people = [
     ],
     arrivalRange: ["2026-07-03", "2026-07-04"],
     departureRange: ["2026-07-10", "2026-07-11"],
-    returnArrivalRange: createInclusiveDateRange("2026-08-01", "2026-08-30"),
+    returnArrivalRange: ["2026-08-01", "2026-08-02"],
     minIntervalMs: 500,
     maxIntervalMs: 3000,
     shockMs: 260,
@@ -134,7 +134,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260720-1330";
+const ASSET_VERSION = "20260720-1332";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -176,19 +176,6 @@ function getDisplayName(person) {
 
 function getRandomDateFromRange(range) {
   return range[getRandomInt(0, range.length - 1)];
-}
-
-function createInclusiveDateRange(startDate, endDate) {
-  const dates = [];
-  const current = parseLocalDate(startDate);
-  const end = parseLocalDate(endDate);
-
-  while (current <= end) {
-    dates.push(formatLocalDate(current));
-    current.setDate(current.getDate() + 1);
-  }
-
-  return dates;
 }
 
 function shouldForceMagicDog() {
