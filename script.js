@@ -68,6 +68,9 @@ const people = [
       "Puttanaaaaaaaaaaaaaaaaaa",
       "John Thernus",
       "DDL ZEN",
+      "John Cooper Works",
+      "Pennyboat",
+      "Nigel Farage",
     ],
     arrivalRange: ["2026-07-03", "2026-07-04"],
     departureRange: ["2026-07-10", "2026-07-11"],
@@ -144,7 +147,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260807-1711";
+const ASSET_VERSION = "20260807-1940";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
