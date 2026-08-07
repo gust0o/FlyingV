@@ -212,17 +212,15 @@ body {
   object-fit: contain;
 }
 
-.home-mark--hospital {
+.home-mark--ecg {
   width: 1.08em;
   height: 1.08em;
 }
 
-.home-mark--hospital path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.home-mark--cross {
+  width: 0.92em;
+  height: 0.92em;
+  object-fit: contain;
 }
 
 .number--haunted {

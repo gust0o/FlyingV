@@ -24,7 +24,7 @@ const people = [
       "Il Messia",
     ],
     infinite: true,
-    homeMarker: "hospital",
+    homeMarkers: ["house", "ecg", "cross"],
   },
   {
     name: "Ciccio",
@@ -147,7 +147,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260807-1940";
+const ASSET_VERSION = "20260807-1947";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -615,27 +615,55 @@ function createPcHomeMark() {
   return image;
 }
 
-function createHospitalHomeMark() {
+function createImageHomeMark(source, className, label) {
+  const image = document.createElement("img");
+  image.className = `home-mark ${className}`;
+  image.src = `${source}?v=${ASSET_VERSION}`;
+  image.alt = label;
+  image.decoding = "async";
+  return image;
+}
+
+function createEcgHomeMark() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "home-mark home-mark--hospital");
-  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("class", "home-mark home-mark--ecg");
+  svg.setAttribute("viewBox", "0 -90 85 105");
   svg.setAttribute("aria-label", "in ospedale");
   svg.setAttribute("role", "img");
 
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", "M6 21V4h12v17M3 21h18M9 8h6M12 5v6M9 14h1M14 14h1M10 21v-4h4v4");
-  svg.append(path);
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  use.setAttribute("href", `assets/esse-ecg.svg?v=${ASSET_VERSION}#Regular-S`);
+  use.setAttribute("transform", "translate(-1407.56 -696)");
+  svg.append(use);
 
   return svg;
 }
 
-function createHomeMark(person) {
-  if (person.homeMarker === "hospital") {
-    return createHospitalHomeMark();
+function getHomeMarker(person) {
+  if (!person.homeMarkers?.length) {
+    return "house";
   }
 
+  if (!person.runtimeHomeMarker) {
+    person.runtimeHomeMarker = person.homeMarkers[getRandomInt(0, person.homeMarkers.length - 1)];
+  }
+
+  return person.runtimeHomeMarker;
+}
+
+function createHomeMark(person) {
   if (shouldShowPcHome(person)) {
     return createPcHomeMark();
+  }
+
+  const homeMarker = getHomeMarker(person);
+
+  if (homeMarker === "ecg") {
+    return createEcgHomeMark();
+  }
+
+  if (homeMarker === "cross") {
+    return createImageHomeMark("assets/esse-cross.svg", "home-mark--cross", "in ospedale");
   }
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
