@@ -212,6 +212,19 @@ body {
   object-fit: contain;
 }
 
+.home-mark--hospital {
+  width: 1.08em;
+  height: 1.08em;
+}
+
+.home-mark--hospital path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .number--haunted {
   isolation: isolate;
   display: inline-flex;

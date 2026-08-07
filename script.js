@@ -24,8 +24,14 @@ const people = [
       "Il Messia",
     ],
     infinite: true,
+    homeMarker: "hospital",
   },
-  { name: "Ciccio", aliases: ["Ciccio", "Alcuni Gufi", "De Rose", "Millepose"], arrivalDate: "2026-08-08" },
+  {
+    name: "Ciccio",
+    aliases: ["Ciccio", "Alcuni Gufi", "De Rose", "Millepose"],
+    arrivalDate: "2026-08-08",
+    arrivalTime: "2026-08-08T20:00",
+  },
   {
     name: "Nardo",
     aliases: ["Nardo", "Nardellone", "Nardolino", "Doremirko", "Paolo", "Pablo Antonio", "Paolo A."],
@@ -65,7 +71,11 @@ const people = [
     ],
     arrivalRange: ["2026-07-03", "2026-07-04"],
     departureRange: ["2026-07-10", "2026-07-11"],
-    returnArrivalRange: ["2026-08-01", "2026-08-02"],
+    returnArrivalRange: ["2026-08-08", "2026-08-09", "2026-08-15"],
+    speculativeReturnArrivalExpiries: {
+      "2026-08-08": "2026-08-09T00:00",
+      "2026-08-09": "2026-08-10T00:00",
+    },
     minIntervalMs: 500,
     maxIntervalMs: 3000,
     shockMs: 260,
@@ -134,7 +144,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260720-1332";
+const ASSET_VERSION = "20260807-1711";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -436,6 +446,16 @@ function getTemporaryStayNumber(person, now = new Date()) {
   return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
 }
 
+function getTimedArrivalNumber(person, now = new Date()) {
+  const arrival = parseLocalDateTime(person.arrivalTime);
+
+  if (now >= arrival) {
+    return HOME_NUMBER;
+  }
+
+  return formatMissingDays(getDaysUntil(person.arrivalDate, now));
+}
+
 function hasPassedRangedDeparture(person, now = new Date()) {
   if (!person.departureRange) {
     return false;
@@ -446,9 +466,16 @@ function hasPassedRangedDeparture(person, now = new Date()) {
   return today >= departure;
 }
 
+function isReturnArrivalPhase(person, now = new Date()) {
+  return Boolean(person.returnArrivalRange) && hasPassedRangedDeparture(person, now);
+}
+
 function getActiveRangedArrivalRange(person, now = new Date()) {
-  if (person.returnArrivalRange && hasPassedRangedDeparture(person, now)) {
-    return person.returnArrivalRange;
+  if (isReturnArrivalPhase(person, now)) {
+    return person.returnArrivalRange.filter((dateString) => {
+      const expiry = person.speculativeReturnArrivalExpiries?.[dateString];
+      return !expiry || now < parseLocalDateTime(expiry);
+    });
   }
 
   return person.arrivalRange;
@@ -478,16 +505,20 @@ function toggleRangedArrivalDate(person, now = new Date()) {
 }
 
 function getRangedArrivalNumber(person, now = new Date()) {
-  const activeRange = getActiveRangedArrivalRange(person, now);
   const arrivalDate = getRangedArrivalDate(person, now);
   const arrival = startOfLocalDay(parseLocalDate(arrivalDate));
   const today = startOfLocalDay(now);
+  const isSpeculative = Boolean(person.speculativeReturnArrivalExpiries?.[arrivalDate]);
+
+  if (isSpeculative) {
+    return formatMissingDays(getDaysUntil(arrivalDate, now));
+  }
 
   if (today < arrival) {
     return formatMissingDays(getDaysUntil(arrivalDate, now));
   }
 
-  if (activeRange === person.returnArrivalRange) {
+  if (isReturnArrivalPhase(person, now)) {
     return HOME_NUMBER;
   }
 
@@ -523,6 +554,10 @@ function getNumber(person, now = new Date()) {
 
   if (person.monacoTrip) {
     return getMonacoTripNumber(person, now);
+  }
+
+  if (person.arrivalTime) {
+    return getTimedArrivalNumber(person, now);
   }
 
   if (hasActiveJulyVisit(person, now)) {
@@ -577,7 +612,25 @@ function createPcHomeMark() {
   return image;
 }
 
+function createHospitalHomeMark() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "home-mark home-mark--hospital");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-label", "in ospedale");
+  svg.setAttribute("role", "img");
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M6 21V4h12v17M3 21h18M9 8h6M12 5v6M9 14h1M14 14h1M10 21v-4h4v4");
+  svg.append(path);
+
+  return svg;
+}
+
 function createHomeMark(person) {
+  if (person.homeMarker === "hospital") {
+    return createHospitalHomeMark();
+  }
+
   if (shouldShowPcHome(person)) {
     return createPcHomeMark();
   }
@@ -916,6 +969,19 @@ function scheduleMonacoTripRefresh(person, number) {
   }, 60 * 1000);
 }
 
+function scheduleTimedArrivalRefresh(person, number) {
+  const delay = parseLocalDateTime(person.arrivalTime) - new Date();
+
+  if (delay <= 0) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    setNumberDisplay(person, number, getNumber(person));
+    scheduleNameCoverageUpdate();
+  }, delay + 50);
+}
+
 function hasMagicDogNames(displayNames) {
   if (displayNames.length !== MAGIC_DOG_NAMES.length) {
     return false;
@@ -1245,6 +1311,10 @@ function render() {
 
       if (person.monacoTrip) {
         scheduleMonacoTripRefresh(person, number);
+      }
+
+      if (person.arrivalTime) {
+        scheduleTimedArrivalRefresh(person, number);
       }
 
       if (hasHauntedSchedule(person)) {
