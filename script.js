@@ -72,29 +72,20 @@ const people = [
       "Pennyboat",
       "Nigel Farage",
     ],
-    arrivalRange: ["2026-07-03", "2026-07-04"],
-    departureRange: ["2026-07-10", "2026-07-11"],
-    returnArrivalRange: ["2026-08-08", "2026-08-09", "2026-08-15"],
-    speculativeReturnArrivalExpiries: {
-      "2026-08-08": "2026-08-09T00:00",
-      "2026-08-09": "2026-08-10T00:00",
-    },
-    minIntervalMs: 500,
-    maxIntervalMs: 3000,
-    shockMs: 260,
+    arrivalDate: "2026-08-10",
+    departureDate: "2026-08-11",
+    returnArrivalDate: "2026-08-14",
   },
-  { name: "Jarbo", aliases: ["Jarbo", "Jarbolone", "Gobu", "Giambadabro"], randomSymbol: true },
+  {
+    name: "Jarbo",
+    aliases: ["Jarbo", "Jarbolone", "Gobu", "Giambadabro"],
+    arrivalDate: "2026-08-18",
+  },
   {
     name: "Rattolino",
     aliases: ["Federico", "Piaz", "Topo", "Topastro", "Muride", "Rattolino"],
-    julyVisit: {
-      arrivalRange: ["2026-07-10", "2026-07-11"],
-      departureDate: "2026-07-14",
-      intervalMs: 7800,
-    },
-    hauntedRange: ["2026-08-08", "2026-08-09"],
-    hauntedIntervalMs: 7800,
-    stayDays: 11,
+    arrivalDate: "2026-08-09",
+    departureDate: "2026-08-20",
   },
   // Add real arrivals like this:
   // { name: "nome", arrivalDate: "2026-08-10" },
@@ -147,7 +138,7 @@ const MAGIC_DOG_NAME_BY_PERSON = {
 };
 const MAGIC_DOG_CHANCE = 40;
 const PC_HOME_CHANCE = 30;
-const ASSET_VERSION = "20260807-1947";
+const ASSET_VERSION = "20260809-0021";
 const OVERFLOW_ALIAS = "Puttanaaaaaaaaaaaaaaaaaa";
 const OVERFLOW_ALIAS_CORE = "Puttana";
 const OVERFLOW_ALIAS_INTRO = "alza il finestrino";
@@ -446,7 +437,17 @@ function getTemporaryStayNumber(person, now = new Date()) {
 
   const today = startOfLocalDay(now);
   const departure = startOfLocalDay(parseLocalDate(getDepartureDate(person)));
-  return today < departure ? HOME_NUMBER : UNKNOWN_RETURN_NUMBER;
+
+  if (today < departure) {
+    return HOME_NUMBER;
+  }
+
+  if (person.returnArrivalDate) {
+    const daysUntilReturn = getDaysUntil(person.returnArrivalDate, now);
+    return daysUntilReturn > 0 ? formatMissingDays(daysUntilReturn) : HOME_NUMBER;
+  }
+
+  return UNKNOWN_RETURN_NUMBER;
 }
 
 function getTimedArrivalNumber(person, now = new Date()) {
@@ -591,7 +592,7 @@ function getNumber(person, now = new Date()) {
     return getHauntedNumber(person, now);
   }
 
-  return formatMissingDays(getDaysUntil(person.arrivalDate));
+  return formatMissingDays(getDaysUntil(person.arrivalDate, now));
 }
 
 function shouldShowPcHome(person) {
